@@ -2,18 +2,32 @@
   const cfg = window.ChatbotConfig || {};
 
   const toggleBtn = document.createElement("button");
-  toggleBtn.className = "chatbot-toggle";
+  toggleBtn.className =
+    "fixed bottom-4 right-4 w-14 h-14 rounded-full bg-blue-600 text-white text-2xl flex items-center justify-center shadow-lg hover:bg-blue-700 z-50";
   toggleBtn.textContent = "💬";
 
   const container = document.createElement("div");
-  container.className = "chatbot-container";
+  container.className =
+    "fixed bottom-20 right-4 w-80 max-h-[75vh] bg-white rounded-xl shadow-2xl flex-col hidden z-40";
 
   container.innerHTML = `
-    <div class="chatbot-header">Chatbot</div>
-    <div class="chatbot-body" id="chatbot-body"></div>
-    <div class="chatbot-input">
-      <input type="text" id="chatbot-input" placeholder="Type a message..." />
-      <button id="chatbot-send">Send</button>
+    <div class="bg-blue-600 text-white text-lg font-semibold px-4 py-2 rounded-t-xl">
+      🤖 Chatbot
+    </div>
+    <div id="chatbot-body" class="flex-1 p-3 space-y-2 overflow-y-auto h-64 text-sm"></div>
+    <div class="flex border-t border-gray-300">
+      <input
+        id="chatbot-input"
+        type="text"
+        placeholder="Type your message..."
+        class="flex-1 px-3 py-2 focus:outline-none rounded-bl-xl"
+      />
+      <button
+        id="chatbot-send"
+        class="px-4 py-2 bg-blue-600 text-white font-semibold hover:bg-blue-700 rounded-br-xl"
+      >
+        Send
+      </button>
     </div>
   `;
 
@@ -26,7 +40,11 @@
 
   function appendMessage(text, from) {
     const div = document.createElement("div");
-    div.className = `chatbot-message ${from}-message`;
+    div.className = `p-2 rounded-lg max-w-[80%] ${
+      from === "user"
+        ? "bg-blue-100 self-end ml-auto text-right"
+        : "bg-gray-100 self-start mr-auto text-left"
+    }`;
     div.textContent = text;
     body.appendChild(div);
     body.scrollTop = body.scrollHeight;
@@ -50,7 +68,6 @@
     saveMessage(msg, "user");
     input.value = "";
 
-    // Simulate backend by echoing the message
     const reply = `You said: "${msg}"`;
     setTimeout(() => {
       appendMessage(reply, "bot");
@@ -59,17 +76,14 @@
   }
 
   toggleBtn.onclick = () => {
-    container.style.display = container.style.display === "flex" ? "none" : "flex";
+    container.classList.toggle("hidden");
+    container.classList.add("flex");
   };
 
   sendBtn.onclick = sendMessage;
   input.onkeypress = (e) => {
     if (e.key === "Enter") sendMessage();
   };
-
-  // Init
-  container.style.display = "none";
-  container.style.flexDirection = "column";
 
   if (cfg.welcomeMessage) {
     appendMessage(cfg.welcomeMessage, "bot");
