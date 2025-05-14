@@ -38,14 +38,33 @@
   const input = container.querySelector("#chatbot-input");
   const sendBtn = container.querySelector("#chatbot-send");
 
-  function appendMessage(text, from) {
+  // function appendMessage(text, from) {
+  //   const div = document.createElement("div");
+  //   div.className = `p-2 rounded-lg max-w-[80%] ${
+  //     from === "user"
+  //       ? "bg-blue-100 self-end ml-auto text-right"
+  //       : "bg-gray-100 self-start mr-auto text-left"
+  //   }`;
+  //   div.textContent = text;
+  //   body.appendChild(div);
+  //   body.scrollTop = body.scrollHeight;
+  // }
+
+  function appendMessage(text, from, isMarkdown = false) {
     const div = document.createElement("div");
-    div.className = `p-2 rounded-lg max-w-[80%] ${
+    div.className = `p-2 rounded-lg max-w-[80%] whitespace-pre-wrap break-words ${
       from === "user"
         ? "bg-blue-100 self-end ml-auto text-right"
         : "bg-gray-100 self-start mr-auto text-left"
     }`;
-    div.textContent = text;
+
+    if (from === "bot" && isMarkdown) {
+      div.innerHTML = marked.parse(text);
+      div.classList.add("prose", "max-w-full", "text-sm");
+    } else {
+      div.textContent = text;
+    }
+
     body.appendChild(div);
     body.scrollTop = body.scrollHeight;
   }
@@ -61,6 +80,20 @@
     localStorage.setItem("chatbot-history", JSON.stringify(history));
   }
 
+  // function sendMessage() {
+  //   const msg = input.value.trim();
+  //   if (!msg) return;
+  //   appendMessage(msg, "user");
+  //   saveMessage(msg, "user");
+  //   input.value = "";
+
+  //   const reply = `You said: "${msg}"`;
+  //   setTimeout(() => {
+  //     appendMessage(reply, "bot");
+  //     saveMessage(reply, "bot");
+  //   }, 500);
+  // }
+
   function sendMessage() {
     const msg = input.value.trim();
     if (!msg) return;
@@ -68,10 +101,21 @@
     saveMessage(msg, "user");
     input.value = "";
 
-    const reply = `You said: "${msg}"`;
+    // Markdown test message
+    const markdownReply = `
+  ### Here's what I can do:
+  - Answer your questions
+  - Provide *helpful* examples
+  - Format \`code\` like this:
+  \`\`\`python
+  def greet(name):
+      return f"Hello, {name}"
+  \`\`\`
+    `;
+
     setTimeout(() => {
-      appendMessage(reply, "bot");
-      saveMessage(reply, "bot");
+      appendMessage(markdownReply, "bot", true);
+      saveMessage(markdownReply, "bot");
     }, 500);
   }
 
