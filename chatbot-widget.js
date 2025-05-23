@@ -48,13 +48,21 @@
   const resetBtn = container.querySelector("#chatbot-reset");
   const downloadBtn = container.querySelector("#chatbot-download");
 
-  function appendMessage(text, from, isMarkdown = false) {
+  function appendMessage(text, from, isMarkdown = false, timestamp = null) {
     const div = document.createElement("div");
     div.className = `p-2 rounded-lg max-w-[80%] whitespace-pre-wrap break-words ${
       from === "user"
         ? "bg-blue-100 self-end ml-auto text-right"
         : "bg-gray-100 self-start mr-auto text-left"
     }`;
+
+    const timeStr = timestamp
+      ? new Date(timestamp).toLocaleString()
+      : new Date().toLocaleString();
+
+    const timeDiv = document.createElement("div");
+    timeDiv.className = "text-xs text-gray-400 mt-1";
+    timeDiv.textContent = timeStr;
 
     if (from === "bot" && isMarkdown) {
       div.innerHTML = marked.parse(text);
@@ -63,21 +71,27 @@
       div.textContent = text;
     }
 
+    div.appendChild(timeDiv);
     body.appendChild(div);
     body.scrollTop = body.scrollHeight;
-    return div; // ✅ so we can later remove or update it
+    return div;
   }
 
   function loadHistory() {
     const history = JSON.parse(localStorage.getItem("chatbot-history") || "[]");
-    history.forEach(({ text, from, isMarkdown }) =>
-      appendMessage(text, from, isMarkdown)
+    history.forEach(({ text, from, isMarkdown, timestamp }) =>
+      appendMessage(text, from, isMarkdown, timestamp)
     );
   }
 
   function saveMessage(text, from, isMarkdown = false) {
     const history = JSON.parse(localStorage.getItem("chatbot-history") || "[]");
-    history.push({ text, from, isMarkdown });
+    history.push({
+      text,
+      from,
+      isMarkdown,
+      timestamp: new Date().toISOString()
+    });
     localStorage.setItem("chatbot-history", JSON.stringify(history));
   }
 
@@ -140,9 +154,10 @@
     const history = getChatHistory(); // uses role/content format
 
     const markdown = history
-      .map(({ role, content }) => {
+      .map(({ role, content, timestamp }) => {
         const prefix = role === "user" ? "### 🧑 User" : "### 🤖 Assistant";
-        return `${prefix}\n\n${content.trim()}\n`;
+        const time = timestamp ? new Date(timestamp).toLocaleString() : "";
+        return `${prefix}  \n*${time}*\n\n${content.trim()}\n`;
       })
       .join("\n---\n\n");
 
