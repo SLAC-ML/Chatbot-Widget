@@ -104,7 +104,7 @@ This repository contains a simple chatbot widget that you can easily integrate i
    ```
 
 3. **Open the HTML File**:
-   Open or serve your `index.html` file in a browser to see the chatbot in action.
+   Open or serve the `index.html` file in your browser to view the chatbot in action. You can use the `index.html` file located in the root directory of this repository as a reference.
 
 ## Customization
 
