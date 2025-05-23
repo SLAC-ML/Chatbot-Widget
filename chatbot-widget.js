@@ -75,6 +75,14 @@
     localStorage.setItem("chatbot-history", JSON.stringify(history));
   }
 
+  function getChatHistory() {
+    const history = JSON.parse(localStorage.getItem("chatbot-history") || "[]");
+    return history.map(({ text, from }) => ({
+      role: from === "user" ? "user" : "assistant",
+      content: text
+    }));
+  }
+
   async function sendMessage() {
     const msg = input.value.trim();
     if (!msg) return;
@@ -94,6 +102,7 @@
         },
         body: JSON.stringify({
           query: msg,
+          history: getChatHistory(),
           embedding_model: "huggingface:thellert/physbert_cased",
           llm_model: "ollama:llama3.1:latest",
           max_documents: 5,
