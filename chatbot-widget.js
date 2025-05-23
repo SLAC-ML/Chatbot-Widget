@@ -129,9 +129,16 @@
     if (e.key === "Enter") sendMessage();
   };
 
-  if (cfg.welcomeMessage) {
+  // Init
+  container.classList.add("flex");
+  container.classList.add("flex-col");
+  container.classList.add("hidden"); // Initially hidden
+
+  const history = JSON.parse(localStorage.getItem("chatbot-history") || "[]");
+  if (history.length === 0 && cfg.welcomeMessage) {
     appendMessage(cfg.welcomeMessage, "bot");
     saveMessage(cfg.welcomeMessage, "bot");
+  } else {
+    loadHistory();
   }
-  loadHistory();
 })();
