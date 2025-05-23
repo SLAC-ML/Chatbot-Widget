@@ -71,12 +71,14 @@
 
   function loadHistory() {
     const history = JSON.parse(localStorage.getItem("chatbot-history") || "[]");
-    history.forEach(({ text, from }) => appendMessage(text, from));
+    history.forEach(({ text, from, isMarkdown }) =>
+      appendMessage(text, from, isMarkdown)
+    );
   }
 
-  function saveMessage(text, from) {
+  function saveMessage(text, from, isMarkdown = false) {
     const history = JSON.parse(localStorage.getItem("chatbot-history") || "[]");
-    history.push({ text, from });
+    history.push({ text, from, isMarkdown });
     localStorage.setItem("chatbot-history", JSON.stringify(history));
   }
 
@@ -115,7 +117,7 @@
 
     setTimeout(() => {
       appendMessage(markdownReply, "bot", true);
-      saveMessage(markdownReply, "bot");
+      saveMessage(markdownReply, "bot", true);
     }, 500);
   }
 
@@ -136,8 +138,8 @@
 
   const history = JSON.parse(localStorage.getItem("chatbot-history") || "[]");
   if (history.length === 0 && cfg.welcomeMessage) {
-    appendMessage(cfg.welcomeMessage, "bot");
-    saveMessage(cfg.welcomeMessage, "bot");
+    appendMessage(cfg.welcomeMessage, "bot", false);
+    saveMessage(cfg.welcomeMessage, "bot", false);
   } else {
     loadHistory();
   }
