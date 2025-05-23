@@ -1,6 +1,7 @@
 {
   "scripts": {
-    "serve": "serve . -l 3000",
+    "serve": "serve src -l 3000",
+    "serve:demo": "serve . -l 3000",
     "build": "npm run build:css && npm run build:js",
     "build:css": "npx @tailwindcss/cli -i src/styles.css -o dist/chatbot-widget.css --minify --content \"src/index.html\" --content \"src/chatbot-widget.js\"",
     "watch:css": "npx @tailwindcss/cli -i src/styles.css -o dist/chatbot-widget.css --watch --content \"src/index.html\" --content \"src/chatbot-widget.js\"",
