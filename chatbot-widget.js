@@ -13,9 +13,14 @@
   container.innerHTML = `
     <div class="bg-blue-600 text-white text-lg font-semibold px-4 py-2 rounded-t-xl flex justify-between items-center">
       <span>🤖 Chatbot</span>
-      <button id="chatbot-reset" class="text-sm bg-blue-500 hover:bg-blue-700 px-2 py-1 rounded ml-2">
-        New Chat
-      </button>
+      <div class="flex gap-2">
+        <button id="chatbot-download" class="text-sm bg-blue-500 hover:bg-blue-700 px-2 py-1 rounded">
+          ⬇️ Save
+        </button>
+        <button id="chatbot-reset" class="text-sm bg-blue-500 hover:bg-blue-700 px-2 py-1 rounded">
+          New Chat
+        </button>
+      </div>
     </div>
     <div id="chatbot-body" class="flex-1 p-3 space-y-2 overflow-y-auto h-64 text-sm"></div>
     <div class="flex border-t border-gray-300">
@@ -41,6 +46,7 @@
   const input = container.querySelector("#chatbot-input");
   const sendBtn = container.querySelector("#chatbot-send");
   const resetBtn = container.querySelector("#chatbot-reset");
+  const downloadBtn = container.querySelector("#chatbot-download");
 
   function appendMessage(text, from, isMarkdown = false) {
     const div = document.createElement("div");
@@ -130,12 +136,34 @@
     }
   }
 
+  function downloadChatHistory() {
+    const history = getChatHistory(); // uses role/content format
+
+    const markdown = history
+      .map(({ role, content }) => {
+        const prefix = role === "user" ? "### 🧑 User" : "### 🤖 Assistant";
+        return `${prefix}\n\n${content.trim()}\n`;
+      })
+      .join("\n---\n\n");
+
+    const blob = new Blob([markdown], { type: "text/markdown" });
+    const url = URL.createObjectURL(blob);
+
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "chat-history.md";
+    a.click();
+
+    URL.revokeObjectURL(url);
+  }
+
   toggleBtn.onclick = () => {
     container.classList.toggle("hidden");
     container.classList.add("flex");
   };
 
   sendBtn.onclick = sendMessage;
+
   input.onkeypress = (e) => {
     if (e.key === "Enter") sendMessage();
   };
@@ -150,6 +178,8 @@
       }
     }
   };
+
+  downloadBtn.onclick = downloadChatHistory;
 
   // Init
   container.classList.add("flex");
