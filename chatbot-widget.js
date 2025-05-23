@@ -50,29 +50,48 @@
 
   function appendMessage(text, from, timestamp = null) {
     const div = document.createElement("div");
-    div.className = `p-2 rounded-lg max-w-[80%] whitespace-pre-wrap break-words ${
+    div.className = `py-2 px-4 rounded-lg max-w-[80%] prose prose-sm text-sm overflow-x-auto whitespace-pre-wrap break-words ${
       from === "user"
         ? "bg-blue-100 self-end ml-auto text-right"
         : "bg-gray-100 self-start mr-auto text-left"
-    } prose text-sm`;
+    }`;
 
     const timeStr = timestamp
       ? new Date(timestamp).toLocaleString()
       : new Date().toLocaleString();
 
     const timeDiv = document.createElement("div");
-    timeDiv.className = "text-xs text-gray-400 mt-1";
+    timeDiv.className = "text-xs text-gray-400 -mt-2";
     timeDiv.textContent = timeStr;
 
     // Render ALL messages as Markdown
     div.innerHTML = marked.parse(text);
+    // grab every <pre> and give it its own padding + scroll
+    div.querySelectorAll("pre").forEach(pre => {
+      pre.classList.add(
+        "overflow-x-auto",  // allow horizontal scroll
+        "whitespace-pre",    // don’t wrap
+        "px-4",              // padding-left/right
+        "py-2",              // padding-top/bottom (optional)
+        "rounded-lg",        // match your bubble’s border radius
+        "bg-gray-50"         // or whatever bg you prefer
+      );
+    });
     div.appendChild(timeDiv);
 
     body.appendChild(div);
     body.scrollTop = body.scrollHeight;
 
     // Trigger MathJax (chtml is safe here)
-    MathJax.typesetPromise([div]);
+    MathJax.typesetPromise([div]).then(() => {
+      div.querySelectorAll('mjx-math[display="true"]').forEach(math => {
+        // wrap it so you don't fight specificity
+        const wrapper = document.createElement('div');
+        wrapper.className = 'overflow-x-auto whitespace-nowrap px-2 py-1';
+        math.replaceWith(wrapper);
+        wrapper.append(math);
+      });
+    });
 
     return div;
   }
