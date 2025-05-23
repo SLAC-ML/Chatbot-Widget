@@ -24,12 +24,12 @@
     </div>
     <div id="chatbot-body" class="flex-1 p-3 space-y-2 overflow-y-auto h-64 text-sm"></div>
     <div class="flex border-t border-gray-300">
-      <input
+      <textarea
         id="chatbot-input"
-        type="text"
         placeholder="Type your message..."
-        class="flex-1 px-3 py-2 focus:outline-none rounded-bl-xl text-sm"
-      />
+        rows="1"
+        class="flex-1 px-3 py-2 text-sm focus:outline-none resize-none rounded-bl-xl overflow-hidden leading-snug max-h-[8rem]"
+      ></textarea>
       <button
         id="chatbot-send"
         class="px-4 py-2 bg-blue-600 text-sm text-white font-semibold hover:bg-blue-700 rounded-br-xl"
@@ -201,9 +201,17 @@
 
   sendBtn.onclick = sendMessage;
 
-  input.onkeypress = (e) => {
-    if (e.key === "Enter") sendMessage();
-  };
+  input.addEventListener("input", () => {
+    input.style.height = "auto"; // Reset first
+    input.style.height = input.scrollHeight + "px"; // Grow to fit content
+  });
+  input.addEventListener("keydown", (e) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault(); // Prevent newline
+      sendMessage();
+      input.style.height = "auto"; // Reset
+    }
+  });
 
   resetBtn.onclick = () => {
     if (confirm("Start a new conversation? This will erase current messages.")) {
