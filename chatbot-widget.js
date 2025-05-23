@@ -48,13 +48,13 @@
   const resetBtn = container.querySelector("#chatbot-reset");
   const downloadBtn = container.querySelector("#chatbot-download");
 
-  function appendMessage(text, from, isMarkdown = false, timestamp = null) {
+  function appendMessage(text, from, timestamp = null) {
     const div = document.createElement("div");
     div.className = `p-2 rounded-lg max-w-[80%] whitespace-pre-wrap break-words ${
       from === "user"
         ? "bg-blue-100 self-end ml-auto text-right"
         : "bg-gray-100 self-start mr-auto text-left"
-    }`;
+    } prose text-sm`;
 
     const timeStr = timestamp
       ? new Date(timestamp).toLocaleString()
@@ -64,59 +64,57 @@
     timeDiv.className = "text-xs text-gray-400 mt-1";
     timeDiv.textContent = timeStr;
 
-    if (from === "bot" && isMarkdown) {
-      div.innerHTML = marked.parse(text);
-      div.classList.add("prose", "max-w-full", "text-sm");
-      MathJax.typesetPromise([div]);
-    } else {
-      div.textContent = text;
-    }
-
+    // Render ALL messages as Markdown
+    div.innerHTML = marked.parse(text);
     div.appendChild(timeDiv);
+
     body.appendChild(div);
     body.scrollTop = body.scrollHeight;
+
+    // Trigger MathJax (chtml is safe here)
+    MathJax.typesetPromise([div]);
+
     return div;
-  }
-
-  function loadHistory() {
-    const history = JSON.parse(localStorage.getItem("chatbot-history") || "[]");
-    history.forEach(({ text, from, isMarkdown, timestamp }) =>
-      appendMessage(text, from, isMarkdown, timestamp)
-    );
-  }
-
-  function saveMessage(text, from, isMarkdown = false) {
-    const history = JSON.parse(localStorage.getItem("chatbot-history") || "[]");
-    history.push({
-      text,
-      from,
-      isMarkdown,
-      timestamp: new Date().toISOString()
-    });
-    localStorage.setItem("chatbot-history", JSON.stringify(history));
-  }
-
-  function getChatHistory() {
-    const history = JSON.parse(localStorage.getItem("chatbot-history") || "[]");
-    return history.map(({ text, from }) => ({
-      role: from === "user" ? "user" : "assistant",
-      content: text
-    }));
   }
 
   function getFullChatHistory() {
     return JSON.parse(localStorage.getItem("chatbot-history") || "[]");
   }
 
+  function loadHistory() {
+    const history = getFullChatHistory();
+    history.forEach(({ text, from, timestamp }) =>
+      appendMessage(text, from, timestamp)
+    );
+  }
+
+  function saveMessage(text, from, timestamp = null) {
+    const history = getFullChatHistory();
+    history.push({
+      text,
+      from,
+      timestamp: timestamp || new Date().toISOString()
+    });
+    localStorage.setItem("chatbot-history", JSON.stringify(history));
+  }
+
+  function extractChatRecords() {
+    const history = getFullChatHistory();
+    return history.map(({ text, from }) => ({
+      role: from === "user" ? "user" : "assistant",
+      content: text
+    }));
+  }
+
   async function sendMessage() {
     const msg = input.value.trim();
     if (!msg) return;
     appendMessage(msg, "user");
-    saveMessage(msg, "user", false);
+    saveMessage(msg, "user");
     input.value = "";
 
     // Show placeholder while waiting
-    const placeholder = appendMessage("_Thinking..._", "bot", true);
+    const placeholder = appendMessage("_Thinking..._", "bot");
 
     try {
       const response = await fetch("http://localhost:8000/ask", {
@@ -127,7 +125,7 @@
         },
         body: JSON.stringify({
           query: msg,
-          history: getChatHistory(),
+          history: extractChatRecords(),
           embedding_model: "huggingface:thellert/physbert_cased",
           llm_model: "ollama:llama3.1:latest",
           max_documents: 5,
@@ -143,15 +141,15 @@
 
       // Remove placeholder and replace it
       placeholder.remove();
-      appendMessage(markdownReply, "bot", true);
-      saveMessage(markdownReply, "bot", true);
+      appendMessage(markdownReply, "bot");
+      saveMessage(markdownReply, "bot");
 
     } catch (error) {
       console.error("Error from backend:", error);
       placeholder.remove();
       const failMsg = "_Failed to get a response from the server._";
-      appendMessage(failMsg, "bot", true);
-      saveMessage(failMsg, "bot", true);
+      appendMessage(failMsg, "bot");
+      saveMessage(failMsg, "bot");
     }
   }
 
@@ -193,24 +191,31 @@
       localStorage.removeItem("chatbot-history");
       body.innerHTML = "";
       if (cfg.welcomeMessage) {
-        appendMessage(cfg.welcomeMessage, "bot", false);
-        saveMessage(cfg.welcomeMessage, "bot", false);
+        appendMessage(cfg.welcomeMessage, "bot");
+        saveMessage(cfg.welcomeMessage, "bot");
       }
     }
   };
 
   downloadBtn.onclick = downloadChatHistory;
 
-  // Init
-  container.classList.add("flex");
-  container.classList.add("flex-col");
-  container.classList.add("hidden"); // Initially hidden
+  function initChatbot() {
+    container.classList.add("flex");
+    container.classList.add("flex-col");
+    container.classList.add("hidden"); // Initially hidden
 
-  const history = JSON.parse(localStorage.getItem("chatbot-history") || "[]");
-  if (history.length === 0 && cfg.welcomeMessage) {
-    appendMessage(cfg.welcomeMessage, "bot", false);
-    saveMessage(cfg.welcomeMessage, "bot", false);
+    const history = getFullChatHistory();
+    if (history.length === 0 && cfg.welcomeMessage) {
+      appendMessage(cfg.welcomeMessage, "bot");
+      saveMessage(cfg.welcomeMessage, "bot");
+    } else {
+      loadHistory();
+    }
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", initChatbot);
   } else {
-    loadHistory();
+    initChatbot();
   }
 })();
