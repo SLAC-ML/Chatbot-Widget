@@ -1,0 +1,12 @@
+{
+  "scripts": {
+    "build:css": "npx @tailwindcss/cli -i styles.css -o dist/chatbot-widget.css --minify --content \"./index.html\" --content \"./chatbot-widget.js\"",
+    "watch:css": "npx @tailwindcss/cli -i styles.css -o dist/chatbot-widget.css --watch --content \"./index.html\" --content \"./chatbot-widget.js\"",
+    "serve": "serve . -l 3000"
+  },
+  "devDependencies": {
+    "tailwindcss": "^4.1.7",
+    "@tailwindcss/cli": "^4.1.7",
+    "serve": "^14.2.4"
+  }
+}

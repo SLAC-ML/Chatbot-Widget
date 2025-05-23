@@ -67,14 +67,14 @@
     // Render ALL messages as Markdown
     div.innerHTML = marked.parse(text);
     // grab every <pre> and give it its own padding + scroll
-    div.querySelectorAll("pre").forEach(pre => {
+    div.querySelectorAll("pre").forEach((pre) => {
       pre.classList.add(
-        "overflow-x-auto",  // allow horizontal scroll
-        "whitespace-pre",    // don’t wrap
-        "px-4",              // padding-left/right
-        "py-2",              // padding-top/bottom (optional)
-        "rounded-lg",        // match your bubble’s border radius
-        "bg-gray-50"         // or whatever bg you prefer
+        "overflow-x-auto", // allow horizontal scroll
+        "whitespace-pre", // don’t wrap
+        "px-4", // padding-left/right
+        "py-2", // padding-top/bottom (optional)
+        "rounded-lg", // match your bubble’s border radius
+        "bg-gray-50" // or whatever bg you prefer
       );
     });
     div.appendChild(timeDiv);
@@ -84,10 +84,10 @@
 
     // Trigger MathJax (chtml is safe here)
     MathJax.typesetPromise([div]).then(() => {
-      div.querySelectorAll('mjx-math[display="true"]').forEach(math => {
+      div.querySelectorAll('mjx-math[display="true"]').forEach((math) => {
         // wrap it so you don't fight specificity
-        const wrapper = document.createElement('div');
-        wrapper.className = 'overflow-x-auto whitespace-nowrap px-2 py-1';
+        const wrapper = document.createElement("div");
+        wrapper.className = "overflow-x-auto whitespace-nowrap px-2 py-1";
         math.replaceWith(wrapper);
         wrapper.append(math);
       });
@@ -112,7 +112,7 @@
     history.push({
       text,
       from,
-      timestamp: timestamp || new Date().toISOString()
+      timestamp: timestamp || new Date().toISOString(),
     });
     localStorage.setItem("chatbot-history", JSON.stringify(history));
   }
@@ -121,7 +121,7 @@
     const history = getFullChatHistory();
     return history.map(({ text, from }) => ({
       role: from === "user" ? "user" : "assistant",
-      content: text
+      content: text,
     }));
   }
 
@@ -140,7 +140,7 @@
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Accept: "application/json"
+          Accept: "application/json",
         },
         body: JSON.stringify({
           query: msg,
@@ -150,19 +150,20 @@
           max_documents: 5,
           score_threshold: 0,
           use_opensearch: false,
-          prompt: "You are a helpful assistant. Output answers in Markdown. Use $ and $$ to surround mathematical formulas. Try to tie your answer to the provided list of sources. Say you don't know if you can't. Be as concise as possible.",
-          files: []
-        })
+          prompt:
+            "You are a helpful assistant. Output answers in Markdown. Use $ and $$ to surround mathematical formulas. Try to tie your answer to the provided list of sources. Say you don't know if you can't. Be as concise as possible.",
+          files: [],
+        }),
       });
 
       const data = await response.json();
-      const markdownReply = data.answer || "_Sorry, I couldn't generate a response._";
+      const markdownReply =
+        data.answer || "_Sorry, I couldn't generate a response._";
 
       // Remove placeholder and replace it
       placeholder.remove();
       appendMessage(markdownReply, "bot");
       saveMessage(markdownReply, "bot");
-
     } catch (error) {
       console.error("Error from backend:", error);
       placeholder.remove();
@@ -214,7 +215,9 @@
   });
 
   resetBtn.onclick = () => {
-    if (confirm("Start a new conversation? This will erase current messages.")) {
+    if (
+      confirm("Start a new conversation? This will erase current messages.")
+    ) {
       localStorage.removeItem("chatbot-history");
       body.innerHTML = "";
       if (cfg.welcomeMessage) {
