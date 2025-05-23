@@ -53,11 +53,11 @@ This repository contains a simple chatbot widget that you can easily integrate i
 ### Integration into Your Webpage
 
 1. **Include the Files in Your Webpage**:
-   Add the following lines to your HTML file:
+   Add the following lines to your HTML file to include the built CSS and JavaScript files from the `dist` directory:
 
    ```html
-   <!-- Include the chatbot widget -->
-   <script src="chatbot-widget.js"></script>
+   <!-- Include the chatbot widget CSS -->
+   <link rel="stylesheet" href="dist/chatbot-widget.css" />
    ```
 
 2. **Configure the Chatbot**:
@@ -71,7 +71,15 @@ This repository contains a simple chatbot widget that you can easily integrate i
    </script>
    ```
 
-3. **Run a Backend API**:
+3. **Include the JavaScript File**:
+   Add the built JavaScript file at the end of the `<body>` tag:
+
+   ```html
+   <!-- Include the chatbot widget JavaScript -->
+   <script src="dist/chatbot-widget.min.js"></script>
+   ```
+
+4. **Run a Backend API**:
    The chatbot expects a backend API at `http://localhost:8000/ask` that accepts a POST request with the following JSON payload:
 
    ```json
@@ -99,8 +107,8 @@ This repository contains a simple chatbot widget that you can easily integrate i
    }
    ```
 
-4. **Open the HTML File**:
-   Open `index.html` in your browser to see the chatbot in action.
+5. **Open the HTML File**:
+   Open or serve your `index.html` file in a browser to see the chatbot in action.
 
 ## Customization
 
