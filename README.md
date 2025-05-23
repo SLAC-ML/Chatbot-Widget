@@ -12,14 +12,47 @@ This repository contains a simple chatbot widget that you can easily integrate i
 
 ## How to Use
 
-1. **Clone the Repository**:
+### Development
+
+1. **Install Dependencies**:
 
    ```bash
-   git clone https://github.com/your-username/simple-chatbot.git
-   cd simple-chatbot
+   npm install
    ```
 
-2. **Include the Files in Your Webpage**:
+2. **Run in Development Mode**:
+
+   Use the following command to start a development server that uses all files from the `src` directory:
+
+   ```bash
+   npm run serve
+   ```
+
+   This will start a local development server and watch for changes in the source files.
+
+3. **Build the Project**:
+
+   To build the JavaScript and CSS files for production, run:
+
+   ```bash
+   npm run build
+   ```
+
+   The output files will be generated in the `dist` directory.
+
+4. **Run the Demo**:
+
+   To run the demo, first ensure the project is built (using `npm run build`), then start the demo server:
+
+   ```bash
+   npm run serve:demo
+   ```
+
+   Open the demo in your browser to see the chatbot in action.
+
+### Integration into Your Webpage
+
+1. **Include the Files in Your Webpage**:
    Add the following lines to your HTML file:
 
    ```html
@@ -27,7 +60,7 @@ This repository contains a simple chatbot widget that you can easily integrate i
    <script src="chatbot-widget.js"></script>
    ```
 
-3. **Configure the Chatbot**:
+2. **Configure the Chatbot**:
    Add a configuration script to your HTML file to customize the chatbot:
 
    ```html
@@ -38,7 +71,7 @@ This repository contains a simple chatbot widget that you can easily integrate i
    </script>
    ```
 
-4. **Run a Backend API**:
+3. **Run a Backend API**:
    The chatbot expects a backend API at `http://localhost:8000/ask` that accepts a POST request with the following JSON payload:
 
    ```json
@@ -66,13 +99,19 @@ This repository contains a simple chatbot widget that you can easily integrate i
    }
    ```
 
-5. **Open the HTML File**:
+4. **Open the HTML File**:
    Open `index.html` in your browser to see the chatbot in action.
 
 ## Customization
 
 - **Welcome Message**: Set a custom welcome message in the `ChatbotConfig` object.
 - **Backend URL**: Update the `fetch` URL in `chatbot-widget.js` to point to your backend API.
+
+## Commands in `package.json`
+
+- `npm run serve`: Starts a development server using files from the `src` directory.
+- `npm run build`: Builds the JavaScript and CSS files for production into the `dist` directory.
+- `npm run serve:demo`: Serves the demo application. Requires the project to be built first.
 
 ## Dependencies
 
