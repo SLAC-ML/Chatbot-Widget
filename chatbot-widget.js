@@ -103,6 +103,10 @@
     }));
   }
 
+  function getFullChatHistory() {
+    return JSON.parse(localStorage.getItem("chatbot-history") || "[]");
+  }
+
   async function sendMessage() {
     const msg = input.value.trim();
     if (!msg) return;
@@ -151,13 +155,13 @@
   }
 
   function downloadChatHistory() {
-    const history = getChatHistory(); // uses role/content format
+    const history = getFullChatHistory(); // full version with text, from, timestamp, etc.
 
     const markdown = history
-      .map(({ role, content, timestamp }) => {
-        const prefix = role === "user" ? "### 🧑 User" : "### 🤖 Assistant";
+      .map(({ from, text, timestamp }) => {
+        const role = from === "user" ? "🧑 User" : "🤖 Assistant";
         const time = timestamp ? new Date(timestamp).toLocaleString() : "";
-        return `${prefix}  \n*${time}*\n\n${content.trim()}\n`;
+        return `### ${role}  \n*${time}*\n\n${text.trim()}\n`;
       })
       .join("\n---\n\n");
 
