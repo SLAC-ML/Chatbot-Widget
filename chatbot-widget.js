@@ -15,7 +15,7 @@
       <span>🤖 Chatbot</span>
       <div class="flex gap-2">
         <button id="chatbot-download" class="text-sm bg-blue-500 hover:bg-blue-700 px-2 py-1 rounded">
-          ⬇️ Save
+          Save Chat
         </button>
         <button id="chatbot-reset" class="text-sm bg-blue-500 hover:bg-blue-700 px-2 py-1 rounded">
           New Chat
@@ -28,11 +28,11 @@
         id="chatbot-input"
         type="text"
         placeholder="Type your message..."
-        class="flex-1 px-3 py-2 focus:outline-none rounded-bl-xl"
+        class="flex-1 px-3 py-2 focus:outline-none rounded-bl-xl text-sm"
       />
       <button
         id="chatbot-send"
-        class="px-4 py-2 bg-blue-600 text-white font-semibold hover:bg-blue-700 rounded-br-xl"
+        class="px-4 py-2 bg-blue-600 text-sm text-white font-semibold hover:bg-blue-700 rounded-br-xl"
       >
         Send
       </button>
@@ -67,6 +67,7 @@
     if (from === "bot" && isMarkdown) {
       div.innerHTML = marked.parse(text);
       div.classList.add("prose", "max-w-full", "text-sm");
+      MathJax.typesetPromise([div]);
     } else {
       div.textContent = text;
     }

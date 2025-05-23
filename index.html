@@ -3,19 +3,42 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Chatbot with Tailwind</title>
-  <script src="https://cdn.tailwindcss.com"></script>
+  <title>Chatbot Demo</title>
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+
+  <!-- MathJax config -->
+  <script>
+    window.MathJax = {
+      tex: {
+        inlineMath: [['$', '$']],
+        displayMath: [['$$', '$$']],
+      },
+      chtml: {
+        scale: 1,
+      },
+    };
+  </script>
+  <!-- MathJax loader -->
+  <script type="text/javascript" id="MathJax-script" async
+    src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js">
+  </script>
 </head>
-<body class="bg-gray-50 text-gray-900">
-  <h1 class="text-2xl font-bold p-6">Welcome to Our Research Group</h1>
-  <p class="px-6">This page includes a chatbot powered by TailwindCSS.</p>
+<body class="bg-accent text-accent-foreground">
+  <h1 class="text-2xl font-bold p-6">Welcome to Neutrino + ML Research Group</h1>
+  <p class="px-6">This page includes a chatbot powered by OuRAGboros.</p>
 
   <script>
     window.ChatbotConfig = {
       welcomeMessage: "👋 Hello! Ask me anything about our research!",
     };
   </script>
+
+  <!-- Support markdown rendering -->
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
+  <!-- Chatbot widget -->
   <script src="chatbot-widget.js"></script>
 </body>
 </html>
