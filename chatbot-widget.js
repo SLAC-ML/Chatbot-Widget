@@ -11,8 +11,11 @@
     "fixed bottom-20 right-4 w-80 max-h-[75vh] bg-white rounded-xl shadow-2xl flex-col hidden z-40";
 
   container.innerHTML = `
-    <div class="bg-blue-600 text-white text-lg font-semibold px-4 py-2 rounded-t-xl">
-      🤖 Chatbot
+    <div class="bg-blue-600 text-white text-lg font-semibold px-4 py-2 rounded-t-xl flex justify-between items-center">
+      <span>🤖 Chatbot</span>
+      <button id="chatbot-reset" class="text-sm bg-blue-500 hover:bg-blue-700 px-2 py-1 rounded ml-2">
+        New Chat
+      </button>
     </div>
     <div id="chatbot-body" class="flex-1 p-3 space-y-2 overflow-y-auto h-64 text-sm"></div>
     <div class="flex border-t border-gray-300">
@@ -37,18 +40,7 @@
   const body = container.querySelector("#chatbot-body");
   const input = container.querySelector("#chatbot-input");
   const sendBtn = container.querySelector("#chatbot-send");
-
-  // function appendMessage(text, from) {
-  //   const div = document.createElement("div");
-  //   div.className = `p-2 rounded-lg max-w-[80%] ${
-  //     from === "user"
-  //       ? "bg-blue-100 self-end ml-auto text-right"
-  //       : "bg-gray-100 self-start mr-auto text-left"
-  //   }`;
-  //   div.textContent = text;
-  //   body.appendChild(div);
-  //   body.scrollTop = body.scrollHeight;
-  // }
+  const resetBtn = container.querySelector("#chatbot-reset");
 
   function appendMessage(text, from, isMarkdown = false) {
     const div = document.createElement("div");
@@ -67,6 +59,7 @@
 
     body.appendChild(div);
     body.scrollTop = body.scrollHeight;
+    return div; // ✅ so we can later remove or update it
   }
 
   function loadHistory() {
@@ -82,43 +75,50 @@
     localStorage.setItem("chatbot-history", JSON.stringify(history));
   }
 
-  // function sendMessage() {
-  //   const msg = input.value.trim();
-  //   if (!msg) return;
-  //   appendMessage(msg, "user");
-  //   saveMessage(msg, "user");
-  //   input.value = "";
-
-  //   const reply = `You said: "${msg}"`;
-  //   setTimeout(() => {
-  //     appendMessage(reply, "bot");
-  //     saveMessage(reply, "bot");
-  //   }, 500);
-  // }
-
-  function sendMessage() {
+  async function sendMessage() {
     const msg = input.value.trim();
     if (!msg) return;
     appendMessage(msg, "user");
-    saveMessage(msg, "user");
+    saveMessage(msg, "user", false);
     input.value = "";
 
-    // Markdown test message
-    const markdownReply = `
-  ### Here's what I can do:
-  - Answer your questions
-  - Provide *helpful* examples
-  - Format \`code\` like this:
-  \`\`\`python
-  def greet(name):
-      return f"Hello, {name}"
-  \`\`\`
-    `;
+    // Show placeholder while waiting
+    const placeholder = appendMessage("_Thinking..._", "bot", true);
 
-    setTimeout(() => {
+    try {
+      const response = await fetch("http://localhost:8000/ask", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json"
+        },
+        body: JSON.stringify({
+          query: msg,
+          embedding_model: "huggingface:thellert/physbert_cased",
+          llm_model: "ollama:llama3.1:latest",
+          max_documents: 5,
+          score_threshold: 0,
+          use_opensearch: false,
+          prompt: "You are a helpful assistant. Output answers in Markdown. Use $ and $$ to surround mathematical formulas. Try to tie your answer to the provided list of sources. Say you don't know if you can't. Be as concise as possible.",
+          files: []
+        })
+      });
+
+      const data = await response.json();
+      const markdownReply = data.answer || "_Sorry, I couldn't generate a response._";
+
+      // Remove placeholder and replace it
+      placeholder.remove();
       appendMessage(markdownReply, "bot", true);
       saveMessage(markdownReply, "bot", true);
-    }, 500);
+
+    } catch (error) {
+      console.error("Error from backend:", error);
+      placeholder.remove();
+      const failMsg = "_Failed to get a response from the server._";
+      appendMessage(failMsg, "bot", true);
+      saveMessage(failMsg, "bot", true);
+    }
   }
 
   toggleBtn.onclick = () => {
@@ -129,6 +129,17 @@
   sendBtn.onclick = sendMessage;
   input.onkeypress = (e) => {
     if (e.key === "Enter") sendMessage();
+  };
+
+  resetBtn.onclick = () => {
+    if (confirm("Start a new conversation? This will erase current messages.")) {
+      localStorage.removeItem("chatbot-history");
+      body.innerHTML = "";
+      if (cfg.welcomeMessage) {
+        appendMessage(cfg.welcomeMessage, "bot", false);
+        saveMessage(cfg.welcomeMessage, "bot", false);
+      }
+    }
   };
 
   // Init
