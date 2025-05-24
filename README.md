@@ -14,6 +14,8 @@ This repository contains a simple chatbot widget that you can easily integrate i
 
 Open the `index.html` file (located in the root of this repository) in your browser, play with the chatbot, enjoy! 😊
 
+**Note**: _To access the backend API in the demo webpage, ensure you are connected to the SLAC VPN._
+
 ## Integration into Your Webpage
 
 1. **Include the Chatbot Widget**:
