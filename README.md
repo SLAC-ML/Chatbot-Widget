@@ -79,8 +79,6 @@ Open the `index.html` file (located in the root of this repository) in your brow
 
 ## Customization
 
-## Customization
-
 You can customize the chatbot widget by modifying the `ChatbotConfig` object or editing the source code. Below are the available customization options:
 
 - **Backend API URL**: Update the `apiUrl` property to point to your backend API. Example:
