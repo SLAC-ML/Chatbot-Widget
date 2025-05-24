@@ -14,12 +14,18 @@
     </h1>
     <p class="px-6">This page includes a chatbot powered by OuRAGboros.</p>
 
-    <!-- Chatbot widget -->
+    <!-- [Optional] Configure Chatbot Widget -->
     <script>
       window.ChatbotConfig = {
-        welcomeMessage: "👋 Hello! Ask me anything about our research!",
+        // apiUrl: "http://localhost:8000/ask",
+        resetWarning:
+          "Start a new conversation? This will erase current messages.", // set to falsy value to disable reset warning
+        // welcomeMessage: "👋 Hello! Ask me anything about our research!",
+        // downloadFilename: "chat-history.md",
+        // chatbotName: "🤖 Chatbot",
       };
     </script>
+    <!-- Load Chatbot Widget -->
     <script src="chatbot-widget.js"></script>
   </body>
 </html>
