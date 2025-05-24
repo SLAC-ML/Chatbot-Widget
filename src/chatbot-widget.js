@@ -1,5 +1,13 @@
 (function () {
-  const cfg = window.ChatbotConfig || {};
+  const defaultConfig = {
+    welcomeMessage: "👋 Hello! Ask me anything about our research!",
+    apiUrl: "http://localhost:8000/ask",
+    downloadFilename: "chat-history.md",
+    chatbotName: "🤖 Chatbot",
+    resetWarning: "Start a new conversation? This will erase current messages.", // set to falsy value to disable reset warning
+  };
+
+  const cfg = { ...defaultConfig, ...(window.ChatbotConfig || {}) };
 
   function loadExternalScript(src, id) {
     return new Promise((resolve, reject) => {
@@ -54,7 +62,7 @@
 
     container.innerHTML = `
       <div class="bg-blue-600 text-white text-lg font-semibold px-4 py-2 rounded-t-xl flex justify-between items-center">
-        <span>🤖 Chatbot</span>
+        <span>${cfg.chatbotName}</span>
         <div class="flex gap-2">
           <button id="chatbot-download" class="text-sm bg-blue-500 hover:bg-blue-700 px-2 py-1 rounded">
             Save Chat
@@ -178,7 +186,7 @@
       const placeholder = appendMessage("_Thinking..._", "bot");
 
       try {
-        const response = await fetch("http://localhost:8000/ask", {
+        const response = await fetch(cfg.apiUrl, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -231,7 +239,7 @@
 
       const a = document.createElement("a");
       a.href = url;
-      a.download = "chat-history.md";
+      a.download = cfg.downloadFilename;
       a.click();
 
       URL.revokeObjectURL(url);
@@ -257,9 +265,7 @@
     });
 
     resetBtn.onclick = () => {
-      if (
-        confirm("Start a new conversation? This will erase current messages.")
-      ) {
+      if (!cfg.resetWarning || confirm(cfg.resetWarning)) {
         localStorage.removeItem("chatbot-history");
         body.innerHTML = "";
         if (cfg.welcomeMessage) {
