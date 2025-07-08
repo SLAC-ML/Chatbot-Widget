@@ -53,36 +53,51 @@
 
     const toggleBtn = document.createElement("button");
     toggleBtn.className =
-      "fixed bottom-4 right-4 w-14 h-14 rounded-full bg-blue-600 text-white text-2xl flex items-center justify-center shadow-lg hover:bg-blue-700 z-50";
+      "fixed bottom-6 right-6 w-16 h-16 rounded-full bg-white/20 backdrop-blur-md border border-white/30 flex items-center justify-center shadow-xl hover:bg-white/30 transition duration-300 z-50";
+    toggleBtn.style.backdropFilter = "saturate(180%) blur(10px)";
     toggleBtn.textContent = "💬";
 
     const container = document.createElement("div");
-    container.className =
-      "fixed bottom-20 right-4 w-80 max-h-[75vh] bg-white rounded-xl shadow-2xl flex-col hidden z-40";
+    container.style.display = "none";
+    container.className = [
+      "fixed inset-x-0 bottom-0", // stretch full width
+      "max-h-[75vh] h-[60vh] md:h-[75vh]", // responsive height
+      "bg-white/50 backdrop-blur-lg", // frosted glass
+      "shadow-2xl",
+      "transform translate-y-full", // start off-screen
+      "transition-transform duration-300 ease-in-out",
+      "flex flex-col z-40",
+    ].join(" ");
 
     container.innerHTML = `
-      <div class="bg-blue-600 text-white text-lg font-semibold px-4 py-2 rounded-t-xl flex justify-between items-center">
-        <span>${cfg.chatbotName}</span>
-        <div class="flex gap-2">
-          <button id="chatbot-download" class="text-sm bg-blue-500 hover:bg-blue-700 px-2 py-1 rounded">
+      <div class="border-b border-gray-200 text-gray-800 text-base font-semibold flex justify-between items-center">
+        <span class="pl-4">${cfg.chatbotName}</span>
+        <div class="flex gap-0">
+          <button
+            id="chatbot-download"
+            class="text-base bg-white/20 backdrop-blur-md border border-white/30 text-gray-900 px-4 py-4 transition hover:bg-black/10"
+          >
             Save Chat
           </button>
-          <button id="chatbot-reset" class="text-sm bg-blue-500 hover:bg-blue-700 px-2 py-1 rounded">
+          <button
+            id="chatbot-reset"
+            class="text-base bg-white/20 backdrop-blur-md border border-white/30 text-gray-900 px-4 py-4 transition hover:bg-black/10"
+          >
             New Chat
           </button>
         </div>
       </div>
-      <div id="chatbot-body" class="flex-1 p-3 space-y-2 overflow-y-auto h-64 text-sm"></div>
-      <div class="flex border-t border-gray-300">
+      <div id="chatbot-body" class="container mx-auto px-8 flex-1 p-3 space-y-2 overflow-y-auto h-64 bg-white"></div>
+      <div class="flex border-t border-gray-200">
         <textarea
           id="chatbot-input"
           placeholder="Type your message..."
           rows="1"
-          class="flex-1 px-3 py-2 text-sm focus:outline-none resize-none rounded-bl-xl overflow-hidden leading-snug max-h-[8rem]"
+          class="flex-1 p-4 focus:outline-none resize-none rounded-bl-xl overflow-hidden leading-snug max-h-[8rem]"
         ></textarea>
         <button
           id="chatbot-send"
-          class="px-4 py-2 bg-blue-600 text-sm text-white font-semibold hover:bg-blue-700 rounded-br-xl"
+          class="px-4 py-2 bg-white/50 backdrop-blur-lg border border-white/30 text-gray-900 font-semibold hover:bg-black/10 transition rounded-br-xl"
         >
           Send
         </button>
@@ -92,6 +107,60 @@
     document.body.appendChild(toggleBtn);
     document.body.appendChild(container);
 
+    // --- hide icon when chat is open & vice versa ---
+    toggleBtn.onclick = (e) => {
+      e.stopPropagation(); // don’t immediately trigger the document click
+      const isOpening = container.classList.contains("translate-y-full");
+      container.classList.toggle("translate-y-full", !isOpening);
+      container.classList.toggle("translate-y-0", isOpening);
+      // hide the icon when open, show it when closed
+      toggleBtn.style.display = isOpening ? "none" : "flex";
+    };
+
+    // prevent clicks INSIDE the chat from bubbling out and closing it
+    container.addEventListener("click", (e) => e.stopPropagation());
+
+    // clicking anywhere else closes the drawer and brings back the icon
+    document.addEventListener("click", () => {
+      if (!container.classList.contains("translate-y-full")) {
+        container.classList.add("translate-y-full");
+        container.classList.remove("translate-y-0");
+        toggleBtn.style.display = "flex";
+      }
+    });
+
+    // Prevent “scroll chaining” inside the chat body
+    const chatBody = container.querySelector("#chatbot-body");
+    chatBody.addEventListener(
+      "wheel",
+      (e) => {
+        const { scrollTop, scrollHeight, clientHeight } = chatBody;
+        const atTop = scrollTop === 0;
+        const atBottom = scrollTop + clientHeight >= scrollHeight;
+        const isScrollingUp = e.deltaY < 0;
+
+        // If we’re at the top and scrolling up, or at the bottom and scrolling down…
+        if ((atTop && isScrollingUp) || (atBottom && !isScrollingUp)) {
+          e.preventDefault(); // stop the parent from scrolling
+        }
+      },
+      { passive: false }
+    );
+
+    // Close on “Esc” key
+    document.addEventListener("keydown", (e) => {
+      if (
+        e.key === "Escape" &&
+        !container.classList.contains("translate-y-full")
+      ) {
+        // slide down
+        container.classList.remove("translate-y-0");
+        container.classList.add("translate-y-full");
+        // show the icon
+        toggleBtn.style.display = "flex";
+      }
+    });
+
     const body = container.querySelector("#chatbot-body");
     const input = container.querySelector("#chatbot-input");
     const sendBtn = container.querySelector("#chatbot-send");
@@ -100,10 +169,10 @@
 
     function appendMessage(text, from, timestamp = null) {
       const div = document.createElement("div");
-      div.className = `py-2 px-4 rounded-lg max-w-[80%] prose prose-sm text-sm overflow-x-auto whitespace-pre-wrap break-words ${
+      div.className = `py-2 px-4 rounded-lg prose prose-sm overflow-x-auto whitespace-pre-wrap break-words ${
         from === "user"
-          ? "bg-blue-100 self-end ml-auto text-right"
-          : "bg-gray-100 self-start mr-auto text-left"
+          ? "bg-gray-100 self-end ml-auto text-right max-w-[60%]"
+          : "self-center mx-auto text-left max-w-[80%]"
       }`;
 
       const timeStr = timestamp
@@ -196,7 +265,7 @@
             query: msg,
             history: extractChatRecords(),
             embedding_model: "huggingface:thellert/physbert_cased",
-            llm_model: "ollama:llama3.1:latest",
+            llm_model: "openai:gpt-4o-mini",
             max_documents: 5,
             score_threshold: 0,
             use_opensearch: false,
@@ -245,11 +314,6 @@
       URL.revokeObjectURL(url);
     }
 
-    toggleBtn.onclick = () => {
-      container.classList.toggle("hidden");
-      container.classList.add("flex");
-    };
-
     sendBtn.onclick = sendMessage;
 
     input.addEventListener("input", () => {
@@ -277,9 +341,9 @@
 
     downloadBtn.onclick = downloadChatHistory;
 
-    container.classList.add("flex");
-    container.classList.add("flex-col");
-    container.classList.add("hidden"); // Initially hidden
+    // container.classList.add("flex");
+    // container.classList.add("flex-col");
+    // container.classList.add("hidden"); // Initially hidden
 
     const history = getFullChatHistory();
     if (history.length === 0 && cfg.welcomeMessage) {
@@ -288,6 +352,27 @@
     } else {
       loadHistory();
     }
+
+    container.style.display = "";
+
+    document.addEventListener("keydown", (e) => {
+      const isMeta = e.metaKey; // ⌘ on Mac
+      const isCtrl = e.ctrlKey; // Ctrl on Windows/Linux
+      if ((isMeta || isCtrl) && e.key.toLowerCase() === "k") {
+        e.preventDefault();
+        // if closed, open it; if open, close it
+        const isClosed = container.classList.contains("translate-y-full");
+        if (isClosed) {
+          container.classList.remove("translate-y-full");
+          container.classList.add("translate-y-0");
+          toggleBtn.style.display = "none";
+        } else {
+          container.classList.remove("translate-y-0");
+          container.classList.add("translate-y-full");
+          toggleBtn.style.display = "flex";
+        }
+      }
+    });
   }
 
   if (document.readyState === "loading") {
