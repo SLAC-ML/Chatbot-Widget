@@ -85,6 +85,13 @@
           >
             New Chat
           </button>
+          <button
+            id="chatbot-use-rag"
+            class="text-base bg-white/20 backdrop-blur-md border border-white/30 text-gray-900 px-4 py-4 transition hover:bg-black/10 flex items-center gap-2"
+          >
+            <input type="checkbox" id="use-rag-checkbox" class="mr-2" />
+            Use RAG
+          </button>
         </div>
       </div>
       <div id="chatbot-body" class="container mx-auto px-8 flex-1 p-3 space-y-2 overflow-y-auto h-64 bg-white"></div>
@@ -103,6 +110,15 @@
         </button>
       </div>
     `;
+
+    // Add event listener to toggle checkbox state when button is clicked
+    const useRagButton = container.querySelector("#chatbot-use-rag");
+    const useRagCheckbox = container.querySelector("#use-rag-checkbox");
+
+    useRagButton.addEventListener("click", (e) => {
+      e.preventDefault(); // Prevent default button behavior
+      useRagCheckbox.checked = !useRagCheckbox.checked; // Toggle checkbox state
+    });
 
     document.body.appendChild(toggleBtn);
     document.body.appendChild(container);
@@ -266,6 +282,7 @@
             history: extractChatRecords(),
             embedding_model: "huggingface:thellert/physbert_cased",
             llm_model: "openai:gpt-4o-mini",
+            use_rag: useRagCheckbox.checked,
             max_documents: 5,
             score_threshold: 0,
             use_opensearch: false,
