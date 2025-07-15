@@ -183,7 +183,7 @@
     const resetBtn = container.querySelector("#chatbot-reset");
     const downloadBtn = container.querySelector("#chatbot-download");
 
-    function appendMessage(text, from, timestamp = null) {
+    function appendMessage(text, from, timestamp = null, docs = []) {
       const div = document.createElement("div");
       div.className = `py-2 px-4 rounded-lg prose prose-sm overflow-x-auto whitespace-pre-wrap break-words ${
         from === "user"
@@ -214,6 +214,94 @@
       });
       div.appendChild(timeDiv);
 
+      if (from === "bot" && docs.length) {
+        // 1) Wrapper for the whole panel
+        const wrapper = document.createElement("div");
+        wrapper.className = "mt-4 bg-gray-50 rounded-lg";
+
+        // 2) Header button (click to toggle)
+        const header = document.createElement("button");
+        header.type = "button";
+        header.className =
+          "w-full flex items-center gap-2 p-4 text-sm font-medium text-gray-800 cursor-pointer";
+        header.innerHTML = `
+          <svg
+            class="w-5 h-5 text-blue-500 transition-transform"
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M9 5l7 7-7 7" />
+          </svg>
+          <span>${docs.length} source${docs.length > 1 ? "s" : ""}</span>
+        `;
+        wrapper.appendChild(header);
+
+        // 3) Content container, hidden by default
+        const content = document.createElement("div");
+        content.className = "overflow-hidden";
+        content.style.height = "0px";
+        content.style.opacity = "0";
+        content.style.transition = "height 0.3s ease, opacity 0.2s ease";
+        content.style.willChange = "height, opacity";
+
+        // 4) Fill in each document snippet
+        docs.forEach((d) => {
+          const p = document.createElement("div");
+          p.className =
+            "m-2 text-sm text-gray-700 bg-white rounded-md shadow-sm";
+          p.innerHTML = `
+            <strong>${d.id}</strong> (score: ${d.score.toFixed(2)})<br>
+            ${d.snippet.replace(/\n/g, "<br>")}…
+          `;
+          content.appendChild(p);
+        });
+        wrapper.appendChild(content);
+
+        // 5) Toggle logic
+        const arrow = header.querySelector("svg");
+        header.addEventListener("click", () => {
+          const isOpen = header.classList.toggle("open");
+          // measure full height
+          const fullH = content.scrollHeight + "px";
+
+          if (isOpen) {
+            // opening: from 0 to fullH
+            content.style.height = "0px";
+            content.style.opacity = "0";
+            // force reflow then animate
+            requestAnimationFrame(() => {
+              content.style.height = fullH;
+              content.style.opacity = "1";
+              arrow.style.transform = "rotate(90deg)";
+            });
+          } else {
+            // closing: from current to 0
+            content.style.height = fullH;
+            content.style.opacity = "1";
+            requestAnimationFrame(() => {
+              content.style.height = "0px";
+              content.style.opacity = "0";
+              arrow.style.transform = "";
+            });
+          }
+        });
+
+        // 6) After opening, clear fixed height so it can grow if needed
+        content.addEventListener("transitionend", (e) => {
+          if (
+            e.propertyName === "height" &&
+            header.classList.contains("open")
+          ) {
+            content.style.height = "auto";
+          }
+        });
+
+        div.appendChild(wrapper);
+      }
+
       body.appendChild(div);
       body.scrollTop = body.scrollHeight;
 
@@ -237,17 +325,18 @@
 
     function loadHistory() {
       const history = getFullChatHistory();
-      history.forEach(({ text, from, timestamp }) =>
-        appendMessage(text, from, timestamp)
+      history.forEach(({ text, from, timestamp, docs }) =>
+        appendMessage(text, from, timestamp, docs || [])
       );
     }
 
-    function saveMessage(text, from, timestamp = null) {
+    function saveMessage(text, from, timestamp = null, docs = []) {
       const history = getFullChatHistory();
       history.push({
         text,
         from,
         timestamp: timestamp || new Date().toISOString(),
+        docs,
       });
       localStorage.setItem("chatbot-history", JSON.stringify(history));
     }
@@ -295,11 +384,12 @@
         const data = await response.json();
         const markdownReply =
           data.answer || "_Sorry, I couldn't generate a response._";
+        const docs = data.documents || [];
 
         // Remove placeholder and replace it
         placeholder.remove();
-        appendMessage(markdownReply, "bot");
-        saveMessage(markdownReply, "bot");
+        appendMessage(markdownReply, "bot", null, docs);
+        saveMessage(markdownReply, "bot", null, docs);
       } catch (error) {
         console.error("Error from backend:", error);
         placeholder.remove();
