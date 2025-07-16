@@ -251,7 +251,7 @@
         docs.forEach((d) => {
           const p = document.createElement("div");
           p.className =
-            "m-2 text-sm text-gray-700 bg-white rounded-md shadow-sm";
+            "m-2 text-sm text-gray-700 bg-white rounded-md shadow-xs";
           p.innerHTML = `
             <strong>${d.id}</strong> (score: ${d.score.toFixed(2)})<br>
             ${d.snippet.replace(/\n/g, "<br>")}…
