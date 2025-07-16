@@ -53,7 +53,7 @@
 
     const toggleBtn = document.createElement("button");
     toggleBtn.className =
-      "fixed bottom-6 right-6 w-16 h-16 rounded-full bg-white/20 backdrop-blur-md border border-white/30 flex items-center justify-center shadow-xl hover:bg-white/30 transition duration-300 z-50";
+      "fixed bottom-6 right-6 w-16 h-16 rounded-full bg-white/20 dark:bg-zinc-950/20 backdrop-blur-md flex items-center justify-center shadow-xl hover:bg-white/40 dark:hover:bg-zinc-950/40 transition duration-300 z-50";
     toggleBtn.style.backdropFilter = "saturate(180%) blur(10px)";
     toggleBtn.textContent = "💬";
 
@@ -62,7 +62,8 @@
     container.className = [
       "fixed inset-x-0 bottom-0", // stretch full width
       "max-h-[75vh] h-[60vh] md:h-[75vh]", // responsive height
-      "bg-white/50 backdrop-blur-lg", // frosted glass
+      "bg-gray-100/50 backdrop-blur-lg", // frosted glass
+      "dark:bg-zinc-950/50", // dark mode support
       "shadow-2xl",
       "transform translate-y-full", // start off-screen
       "transition-transform duration-300 ease-in-out",
@@ -70,41 +71,54 @@
     ].join(" ");
 
     container.innerHTML = `
-      <div class="border-b border-gray-200 text-gray-800 text-base font-semibold flex justify-between items-center">
+      <div class="border-b border-gray-200 dark:border-zinc-500 text-gray-800 dark:text-gray-100 text-base font-semibold flex justify-between items-center">
         <span class="pl-4">${cfg.chatbotName}</span>
         <div class="flex gap-0">
           <button
             id="chatbot-download"
-            class="text-base bg-white/20 backdrop-blur-md border border-white/30 text-gray-900 px-4 py-4 transition hover:bg-black/10"
+            class="text-base text-gray-900 dark:text-gray-100 px-4 py-4 transition hover:bg-black/10 dark:hover:bg-white/10"
           >
             Save Chat
           </button>
           <button
             id="chatbot-reset"
-            class="text-base bg-white/20 backdrop-blur-md border border-white/30 text-gray-900 px-4 py-4 transition hover:bg-black/10"
+            class="text-base text-gray-900 dark:text-gray-100 px-4 py-4 transition hover:bg-black/10 dark:hover:bg-white/10"
           >
             New Chat
           </button>
           <button
             id="chatbot-use-rag"
-            class="text-base bg-white/20 backdrop-blur-md border border-white/30 text-gray-900 px-4 py-4 transition hover:bg-black/10 flex items-center gap-2"
+            class="text-base text-gray-900 dark:text-gray-100 px-4 py-4 transition hover:bg-black/10 dark:hover:bg-white/10 flex items-center gap-2"
           >
             <input type="checkbox" id="use-rag-checkbox" class="mr-2" />
             Use RAG
           </button>
+          <button
+            id="chatbot-theme-toggle"
+            aria-label="Toggle light/dark theme"
+            class="text-base text-gray-900 dark:text-gray-100 px-4 py-4 transition hover:bg-black/10 dark:hover:bg-white/10 flex items-center justify-center"
+          >
+            <!-- We'll swap this icon in JS -->
+            <svg id="theme-icon" xmlns="http://www.w3.org/2000/svg" class="w-6 h-6"
+                fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <!-- placeholder: sun by default -->
+              <path stroke-linecap="round" stroke-linejoin="round"
+                    d="M12 3v2m0 14v2m9-9h-2M5 12H3m15.364-6.364l-1.414 1.414M7.05 16.95l-1.414 1.414M17.364 17.364l-1.414-1.414M7.05 7.05L5.636 5.636" />
+            </svg>
+          </button>
         </div>
       </div>
-      <div id="chatbot-body" class="px-[clamp(1rem,calc((100vw-1024px)/2),100rem)] flex-1 py-3 space-y-2 overflow-y-auto h-64 bg-white"></div>
-      <div class="flex border-t border-gray-200">
+      <div id="chatbot-body" class="px-[clamp(1rem,calc((100vw-1024px)/2),100rem)] flex-1 py-3 space-y-2 overflow-y-auto h-64 bg-white dark:bg-zinc-950 text-black dark:text-gray-100"></div>
+      <div class="flex border-t border-gray-200 dark:border-zinc-500">
         <textarea
           id="chatbot-input"
           placeholder="Type your message..."
           rows="1"
-          class="flex-1 p-4 focus:outline-none resize-none rounded-bl-xl overflow-hidden leading-snug max-h-[8rem]"
+          class="flex-1 p-4 focus:outline-none resize-none rounded-bl-xl overflow-hidden text-gray-900 dark:text-gray-100 leading-snug max-h-[8rem]"
         ></textarea>
         <button
           id="chatbot-send"
-          class="px-4 py-2 bg-white/50 backdrop-blur-lg border border-white/30 text-gray-900 font-semibold hover:bg-black/10 transition rounded-br-xl"
+          class="px-4 py-2 text-gray-900 dark:text-gray-100 font-semibold hover:bg-black/10 dark:hover:bg-white/10 transition rounded-br-xl"
         >
           Send
         </button>
@@ -122,6 +136,45 @@
 
     document.body.appendChild(toggleBtn);
     document.body.appendChild(container);
+
+    //  ——— Theme management ———
+    const themeToggleBtn = container.querySelector("#chatbot-theme-toggle");
+    const themeIcon = themeToggleBtn.querySelector("#theme-icon");
+
+    // 1) Load saved or system theme
+    let theme = localStorage.getItem("chatbot-theme");
+    if (!theme) {
+      theme = window.matchMedia("(prefers-color-scheme: dark)").matches
+        ? "dark"
+        : "light";
+    }
+
+    // 2) Apply it to <html> so Tailwind dark: classes take effect
+    document.documentElement.classList.toggle("dark", theme === "dark");
+    // 3) Set the correct icon (sun for light, moon for dark)
+    function updateIcon() {
+      if (theme === "dark") {
+        themeIcon.innerHTML = `
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M21 12.79A9 9 0 1111.21 3a7 7 0 109.79 9.79z" />
+        `; // moon
+      } else {
+        themeIcon.innerHTML = `
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M12 3v2m0 14v2m9-9h-2M5 12H3m15.364-6.364l-1.414 1.414M7.05 16.95l-1.414 1.414
+                  M17.364 17.364l-1.414-1.414M7.05 7.05L5.636 5.636" />
+        `; // sun
+      }
+    }
+    updateIcon();
+
+    // 4) Toggle handler
+    themeToggleBtn.addEventListener("click", () => {
+      theme = theme === "dark" ? "light" : "dark";
+      document.documentElement.classList.toggle("dark", theme === "dark");
+      localStorage.setItem("chatbot-theme", theme);
+      updateIcon();
+    });
 
     // --- hide icon when chat is open & vice versa ---
     toggleBtn.onclick = (e) => {
@@ -187,7 +240,7 @@
       const div = document.createElement("div");
       div.className = `py-2 px-4 rounded-lg prose prose-sm overflow-x-auto whitespace-pre-wrap break-words ${
         from === "user"
-          ? "bg-gray-100 self-end ml-auto mr-4 text-right max-w-[60%]"
+          ? "bg-gray-100 dark:bg-zinc-800 self-end ml-auto mr-4 text-right max-w-[60%]"
           : "self-center mx-auto text-left w-full"
       }`;
 
@@ -217,13 +270,13 @@
       if (from === "bot" && docs.length) {
         // 1) Wrapper for the whole panel
         const wrapper = document.createElement("div");
-        wrapper.className = "mt-4 bg-gray-50 rounded-lg";
+        wrapper.className = "mt-4 bg-gray-50 dark:bg-zinc-900 rounded-lg";
 
         // 2) Header button (click to toggle)
         const header = document.createElement("button");
         header.type = "button";
         header.className =
-          "w-full flex items-center gap-2 p-4 text-sm font-medium text-gray-800 cursor-pointer";
+          "w-full flex items-center gap-2 p-4 text-sm font-medium text-gray-800 dark:text-gray-100 cursor-pointer";
         header.innerHTML = `
           <svg
             class="w-5 h-5 text-blue-500 transition-transform"
@@ -251,7 +304,7 @@
         docs.forEach((d) => {
           const p = document.createElement("div");
           p.className =
-            "m-2 text-sm text-gray-700 bg-white rounded-md shadow-xs";
+            "m-2 text-sm text-gray-700 dark:text-gray-200 bg-white dark:bg-zinc-950 rounded-md shadow-xs dark:shadow-zinc-800";
           p.innerHTML = `
             <strong>${d.id}</strong> (score: ${d.score.toFixed(2)})<br>
             ${d.snippet.replace(/\n/g, "<br>")}…
