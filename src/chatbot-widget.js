@@ -94,7 +94,7 @@
           </button>
         </div>
       </div>
-      <div id="chatbot-body" class="container mx-auto px-8 flex-1 p-3 space-y-2 overflow-y-auto h-64 bg-white"></div>
+      <div id="chatbot-body" class="px-[clamp(1rem,calc((100vw-1024px)/2),100rem)] flex-1 py-3 space-y-2 overflow-y-auto h-64 bg-white"></div>
       <div class="flex border-t border-gray-200">
         <textarea
           id="chatbot-input"
@@ -187,8 +187,8 @@
       const div = document.createElement("div");
       div.className = `py-2 px-4 rounded-lg prose prose-sm overflow-x-auto whitespace-pre-wrap break-words ${
         from === "user"
-          ? "bg-gray-100 self-end ml-auto text-right max-w-[60%]"
-          : "self-center mx-auto text-left max-w-[80%]"
+          ? "bg-gray-100 self-end ml-auto mr-4 text-right max-w-[60%]"
+          : "self-center mx-auto text-left w-full"
       }`;
 
       const timeStr = timestamp
