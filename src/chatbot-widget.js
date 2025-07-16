@@ -71,57 +71,59 @@
     ].join(" ");
 
     container.innerHTML = `
-      <div class="border-b border-gray-200 dark:border-zinc-500 text-gray-800 dark:text-gray-100 text-base font-semibold flex justify-between items-center">
-        <span class="pl-4">${cfg.chatbotName}</span>
-        <div class="flex gap-0">
+      <div class="relative flex-1 overflow-hidden">
+        <div id="chatbot-body" class="absolute inset-0 px-[clamp(1rem,calc((100vw-1024px)/2),100rem)] py-16 space-y-2 overflow-y-auto bg-white dark:bg-zinc-950 text-black dark:text-gray-100"></div>
+        <div id="chatbot-header" class="absolute top-0 left-0 right-0 h-14 bg-white/20 backdrop-blur-md border-b border-gray-200 dark:border-zinc-600 text-gray-800 dark:text-gray-100 text-base font-semibold flex justify-between items-center">
+          <span class="pl-4">${cfg.chatbotName}</span>
+          <div class="flex gap-0">
+            <button
+              id="chatbot-download"
+              class="text-base text-gray-900 dark:text-gray-100 px-4 py-4 transition hover:bg-black/10 dark:hover:bg-white/10"
+            >
+              Save Chat
+            </button>
+            <button
+              id="chatbot-reset"
+              class="text-base text-gray-900 dark:text-gray-100 px-4 py-4 transition hover:bg-black/10 dark:hover:bg-white/10"
+            >
+              New Chat
+            </button>
+            <button
+              id="chatbot-use-rag"
+              class="text-base text-gray-900 dark:text-gray-100 px-4 py-4 transition hover:bg-black/10 dark:hover:bg-white/10 flex items-center gap-2"
+            >
+              <input type="checkbox" id="use-rag-checkbox" class="mr-2" />
+              Use RAG
+            </button>
+            <button
+              id="chatbot-theme-toggle"
+              aria-label="Toggle light/dark theme"
+              class="text-base text-gray-900 dark:text-gray-100 px-4 py-4 transition hover:bg-black/10 dark:hover:bg-white/10 flex items-center justify-center"
+            >
+              <!-- We'll swap this icon in JS -->
+              <svg id="theme-icon" xmlns="http://www.w3.org/2000/svg" class="w-6 h-6"
+                  fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <!-- placeholder: sun by default -->
+                <path stroke-linecap="round" stroke-linejoin="round"
+                      d="M12 3v2m0 14v2m9-9h-2M5 12H3m15.364-6.364l-1.414 1.414M7.05 16.95l-1.414 1.414M17.364 17.364l-1.414-1.414M7.05 7.05L5.636 5.636" />
+              </svg>
+            </button>
+          </div>
+        </div>
+        <div id="chatbot-footer" class="absolute bottom-0 left-0 right-0 flex bg-white/20 backdrop-blur-md border-t border-gray-200 dark:border-zinc-600">
+          <textarea
+            id="chatbot-input"
+            placeholder="Type your message..."
+            rows="1"
+            class="flex-1 p-4 focus:outline-none resize-none rounded-bl-xl overflow-hidden text-gray-900 dark:text-gray-100 leading-snug max-h-[8rem]"
+          ></textarea>
           <button
-            id="chatbot-download"
-            class="text-base text-gray-900 dark:text-gray-100 px-4 py-4 transition hover:bg-black/10 dark:hover:bg-white/10"
+            id="chatbot-send"
+            class="px-4 py-2 text-gray-900 dark:text-gray-100 font-semibold hover:bg-black/10 dark:hover:bg-white/10 transition rounded-br-xl"
           >
-            Save Chat
-          </button>
-          <button
-            id="chatbot-reset"
-            class="text-base text-gray-900 dark:text-gray-100 px-4 py-4 transition hover:bg-black/10 dark:hover:bg-white/10"
-          >
-            New Chat
-          </button>
-          <button
-            id="chatbot-use-rag"
-            class="text-base text-gray-900 dark:text-gray-100 px-4 py-4 transition hover:bg-black/10 dark:hover:bg-white/10 flex items-center gap-2"
-          >
-            <input type="checkbox" id="use-rag-checkbox" class="mr-2" />
-            Use RAG
-          </button>
-          <button
-            id="chatbot-theme-toggle"
-            aria-label="Toggle light/dark theme"
-            class="text-base text-gray-900 dark:text-gray-100 px-4 py-4 transition hover:bg-black/10 dark:hover:bg-white/10 flex items-center justify-center"
-          >
-            <!-- We'll swap this icon in JS -->
-            <svg id="theme-icon" xmlns="http://www.w3.org/2000/svg" class="w-6 h-6"
-                fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-              <!-- placeholder: sun by default -->
-              <path stroke-linecap="round" stroke-linejoin="round"
-                    d="M12 3v2m0 14v2m9-9h-2M5 12H3m15.364-6.364l-1.414 1.414M7.05 16.95l-1.414 1.414M17.364 17.364l-1.414-1.414M7.05 7.05L5.636 5.636" />
-            </svg>
+            Send
           </button>
         </div>
-      </div>
-      <div id="chatbot-body" class="px-[clamp(1rem,calc((100vw-1024px)/2),100rem)] flex-1 py-3 space-y-2 overflow-y-auto h-64 bg-white dark:bg-zinc-950 text-black dark:text-gray-100"></div>
-      <div class="flex border-t border-gray-200 dark:border-zinc-500">
-        <textarea
-          id="chatbot-input"
-          placeholder="Type your message..."
-          rows="1"
-          class="flex-1 p-4 focus:outline-none resize-none rounded-bl-xl overflow-hidden text-gray-900 dark:text-gray-100 leading-snug max-h-[8rem]"
-        ></textarea>
-        <button
-          id="chatbot-send"
-          class="px-4 py-2 text-gray-900 dark:text-gray-100 font-semibold hover:bg-black/10 dark:hover:bg-white/10 transition rounded-br-xl"
-        >
-          Send
-        </button>
       </div>
     `;
 
