@@ -1,7 +1,7 @@
 (function () {
   const defaultConfig = {
     welcomeMessage: "👋 Hello! Ask me anything about our research!",
-    apiUrl: "http://localhost:8000/ask",
+    apiUrl: "http://localhost:8000/ask/stream",
     downloadFilename: "chat-history.md",
     chatbotName: "🤖 Chatbot",
     resetWarning: "Start a new conversation? This will erase current messages.", // set to falsy value to disable reset warning
@@ -411,21 +411,23 @@
       saveMessage(msg, "user");
       input.value = "";
 
-      // Show placeholder while waiting
-      const placeholder = appendMessage("_Thinking..._", "bot");
+      // Create response message that we'll update during streaming
+      let botAnswer = "";
+      let docs = [];
+      const botMessageDiv = appendMessage("", "bot");
 
       try {
         const response = await fetch(cfg.apiUrl, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            Accept: "application/json",
+            Accept: "text/event-stream",
           },
           body: JSON.stringify({
             query: msg,
             history: extractChatRecords(),
             embedding_model: "huggingface:thellert/physbert_cased",
-            llm_model: "stanford:gpt-4.ominia",
+            llm_model: "stanford:gpt-4.omini",
             use_rag: useRagCheckbox.checked,
             max_documents: 5,
             score_threshold: 0,
@@ -438,18 +440,68 @@
           }),
         });
 
-        const data = await response.json();
-        const markdownReply =
-          data.answer || "_Sorry, I couldn't generate a response._";
-        const docs = data.documents || [];
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
 
-        // Remove placeholder and replace it
-        placeholder.remove();
-        appendMessage(markdownReply, "bot", null, docs);
-        saveMessage(markdownReply, "bot", null, docs);
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder();
+
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+
+          const chunk = decoder.decode(value, { stream: true });
+          const lines = chunk.split("\n");
+
+          for (const line of lines) {
+            if (line.startsWith("data: ")) {
+              try {
+                const data = JSON.parse(line.slice(6));
+
+                if (data.type === "token") {
+                  botAnswer = data.partial_answer || "";
+                  // Update the message content with streaming tokens
+                  const contentDiv =
+                    botMessageDiv.querySelector(".prose") || botMessageDiv;
+                  contentDiv.innerHTML = marked.parse(botAnswer);
+                  // Scroll to bottom as we stream
+                  body.scrollTop = body.scrollHeight;
+                } else if (data.type === "documents") {
+                  docs = data.data || [];
+                } else if (data.type === "status") {
+                  // Show status updates
+                  if (!botAnswer) {
+                    const contentDiv =
+                      botMessageDiv.querySelector(".prose") || botMessageDiv;
+                    contentDiv.innerHTML = `<em>${data.message}</em>`;
+                  }
+                } else if (data.type === "error") {
+                  throw new Error(data.message);
+                }
+              } catch (parseError) {
+                // Ignore parsing errors for incomplete JSON chunks
+                continue;
+              }
+            }
+          }
+        }
+
+        // Final processing after streaming is complete
+        if (botAnswer) {
+          // Remove old content and re-render with documents
+          botMessageDiv.remove();
+          appendMessage(botAnswer, "bot", null, docs);
+          saveMessage(botAnswer, "bot", null, docs);
+        } else {
+          botMessageDiv.remove();
+          const failMsg = "_Sorry, I couldn't generate a response._";
+          appendMessage(failMsg, "bot");
+          saveMessage(failMsg, "bot");
+        }
       } catch (error) {
         console.error("Error from backend:", error);
-        placeholder.remove();
+        botMessageDiv.remove();
         const failMsg = "_Failed to get a response from the server._";
         appendMessage(failMsg, "bot");
         saveMessage(failMsg, "bot");
