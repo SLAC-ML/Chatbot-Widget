@@ -171,8 +171,8 @@
     container.innerHTML = `
       <div class="relative flex-1 overflow-hidden">
         <div id="chatbot-body" class="absolute inset-0 px-[clamp(1rem,calc((100vw-1024px)/2),100rem)] py-16 space-y-2 overflow-y-auto bg-white dark:bg-zinc-950 text-black dark:text-gray-100"></div>
-        <div id="chatbot-header" class="absolute top-0 left-0 right-0 h-14 bg-white/20 backdrop-blur-md border-b border-gray-200 dark:border-zinc-600 text-gray-800 dark:text-gray-100 text-base font-semibold flex justify-between items-center">
-          <span class="pl-4">${cfg.chatbotName}</span>
+        <div id="chatbot-header" class="absolute top-0 w-full h-14 bg-white/20 backdrop-blur-md border-b border-gray-200 dark:border-zinc-600 text-gray-800 dark:text-gray-100 text-base font-semibold flex justify-between items-center px-[clamp(1rem,calc((100vw-1024px)/2),100rem)]">
+          <span>${cfg.chatbotName}</span>
           <div class="flex gap-0">
             <button
               id="chatbot-download"
@@ -208,19 +208,21 @@
             </button>
           </div>
         </div>
-        <div id="chatbot-footer" class="absolute bottom-0 left-0 right-0 flex bg-white/20 backdrop-blur-md border-t border-gray-200 dark:border-zinc-600">
-          <textarea
-            id="chatbot-input"
-            placeholder="Type your message..."
-            rows="1"
-            class="flex-1 p-4 focus:outline-none resize-none rounded-bl-xl overflow-hidden text-gray-900 dark:text-gray-100 leading-snug max-h-[8rem]"
-          ></textarea>
-          <button
-            id="chatbot-send"
-            class="px-4 py-2 text-gray-900 dark:text-gray-100 font-semibold hover:bg-black/10 dark:hover:bg-white/10 transition rounded-br-xl"
-          >
-            Send
-          </button>
+        <div id="chatbot-footer" class="absolute bottom-0 w-full flex justify-center px-[clamp(1rem,calc((100vw-1024px)/2),100rem)] py-4">
+          <div class="flex bg-white dark:bg-zinc-800 rounded-3xl shadow-lg border border-gray-300 dark:border-zinc-600 max-w-4xl w-full">
+            <textarea
+              id="chatbot-input"
+              placeholder="Type your message..."
+              rows="1"
+              class="flex-1 px-4 py-3 focus:outline-none resize-none bg-transparent text-gray-900 dark:text-gray-100 leading-snug max-h-[8rem] rounded-l-3xl"
+            ></textarea>
+            <button
+              id="chatbot-send"
+              class="px-6 py-3 text-gray-900 dark:text-gray-100 font-semibold hover:bg-gray-100 dark:hover:bg-zinc-700 transition rounded-r-3xl"
+            >
+              Send
+            </button>
+          </div>
         </div>
       </div>
     `;
