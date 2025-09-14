@@ -340,7 +340,7 @@
       const div = document.createElement("div");
       div.className = `py-2 px-4 rounded-lg overflow-x-auto break-words markdown-content ${
         from === "user"
-          ? "bg-gray-100 dark:bg-zinc-800 self-end ml-auto mr-4 text-right max-w-[60%]"
+          ? "bg-gray-100 dark:bg-zinc-800 self-end ml-auto mr-4 text-left max-w-[60%]"
           : "self-center mx-auto text-left w-full"
       }`;
 
