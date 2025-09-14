@@ -30,6 +30,102 @@
         };
     </script>
     <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+
+    <!-- Custom CSS matching chatbot widget -->
+    <style>
+        .markdown-content h1, .markdown-content h2, .markdown-content h3,
+        .markdown-content h4, .markdown-content h5, .markdown-content h6 {
+            font-weight: bold;
+            margin-top: 1.5em;
+            margin-bottom: 0.5em;
+        }
+        .markdown-content h1 { font-size: 1.5em; }
+        .markdown-content h2 { font-size: 1.3em; }
+        .markdown-content h3 { font-size: 1.1em; }
+        .markdown-content p {
+            margin-bottom: 1em;
+        }
+        .markdown-content ul, .markdown-content ol {
+            margin: 1em 0;
+            padding-left: 1.5em;
+        }
+        .markdown-content ul {
+            list-style-type: disc;
+        }
+        .markdown-content ol {
+            list-style-type: decimal;
+        }
+        .markdown-content ul ul {
+            list-style-type: circle;
+        }
+        .markdown-content ul ul ul {
+            list-style-type: square;
+        }
+        .markdown-content li {
+            margin: 0.25em 0;
+            display: list-item;
+        }
+        .markdown-content table {
+            border-collapse: collapse;
+            width: 100%;
+            margin: 1em 0;
+        }
+        .markdown-content th, .markdown-content td {
+            border: 1px solid #e5e7eb;
+            padding: 0.5em;
+            text-align: left;
+        }
+        .markdown-content th {
+            background-color: #f9fafb;
+            font-weight: bold;
+        }
+        .markdown-content code {
+            background-color: #f1f5f9;
+            padding: 0.125em 0.25em;
+            border-radius: 0.25em;
+            font-family: monospace;
+            font-size: 1em;
+        }
+        .markdown-content pre {
+            background-color: #f8fafc;
+            padding: 1em;
+            border-radius: 0.5em;
+            overflow-x: auto;
+            margin: 1em 0;
+            font-size: 1em;
+        }
+        .markdown-content pre code {
+            background-color: transparent;
+            padding: 0;
+            border-radius: 0;
+            font-size: inherit;
+        }
+        .markdown-content blockquote {
+            border-left: 4px solid #e5e7eb;
+            padding-left: 1em;
+            margin: 1em 0;
+            color: #6b7280;
+        }
+        .dark .markdown-content th, .dark .markdown-content td {
+            border-color: #374151;
+        }
+        .dark .markdown-content th {
+            background-color: #1f2937;
+        }
+        .dark .markdown-content code {
+            background-color: #374151;
+        }
+        .dark .markdown-content pre {
+            background-color: #1f2937;
+        }
+        .dark .markdown-content pre code {
+            background-color: transparent;
+        }
+        .dark .markdown-content blockquote {
+            border-left-color: #374151;
+            color: #9ca3af;
+        }
+    </style>
 </head>
 <body class="bg-gray-50 dark:bg-zinc-900 text-gray-900 dark:text-gray-100">
     <div class="container mx-auto p-6">
@@ -66,7 +162,7 @@
                     <h3 class="text-lg font-semibold mb-3">Marked.js</h3>
                 <div
                     id="marked-output"
-                    class="h-96 p-3 bg-gray-50 dark:bg-zinc-700 border rounded overflow-y-auto text-sm"
+                    class="h-96 p-3 bg-gray-50 dark:bg-zinc-700 border rounded overflow-y-auto text-sm markdown-content"
                     style="max-width: none;"
                 >
                     <em>Marked.js output...</em>
@@ -78,7 +174,7 @@
                     <h3 class="text-lg font-semibold mb-3">Markdown-it</h3>
                     <div
                         id="markdown-it-output"
-                        class="h-96 p-3 bg-gray-50 dark:bg-zinc-700 border rounded overflow-y-auto text-sm"
+                        class="h-96 p-3 bg-gray-50 dark:bg-zinc-700 border rounded overflow-y-auto text-sm markdown-content"
                         style="max-width: none;"
                     >
                         <em>Markdown-it output...</em>
@@ -90,7 +186,7 @@
                     <h3 class="text-lg font-semibold mb-3">Showdown.js</h3>
                     <div
                         id="showdown-output"
-                        class="h-96 p-3 bg-gray-50 dark:bg-zinc-700 border rounded overflow-y-auto text-sm"
+                        class="h-96 p-3 bg-gray-50 dark:bg-zinc-700 border rounded overflow-y-auto text-sm markdown-content"
                         style="max-width: none;"
                     >
                         <em>Showdown.js output...</em>
@@ -120,7 +216,7 @@
                     <h3 class="text-lg font-semibold mb-3">Marked.js</h3>
                     <div
                         id="manual-marked"
-                        class="h-96 p-3 bg-gray-50 dark:bg-zinc-700 border rounded overflow-y-auto text-sm"
+                        class="h-96 p-3 bg-gray-50 dark:bg-zinc-700 border rounded overflow-y-auto text-sm markdown-content"
                         style="max-width: none;"
                     >
                         <em>Manual Marked.js output...</em>
@@ -132,7 +228,7 @@
                     <h3 class="text-lg font-semibold mb-3">Markdown-it</h3>
                     <div
                         id="manual-markdown-it"
-                        class="h-96 p-3 bg-gray-50 dark:bg-zinc-700 border rounded overflow-y-auto text-sm"
+                        class="h-96 p-3 bg-gray-50 dark:bg-zinc-700 border rounded overflow-y-auto text-sm markdown-content"
                         style="max-width: none;"
                     >
                         <em>Manual Markdown-it output...</em>
@@ -144,7 +240,7 @@
                     <h3 class="text-lg font-semibold mb-3">Showdown.js</h3>
                     <div
                         id="manual-showdown"
-                        class="h-96 p-3 bg-gray-50 dark:bg-zinc-700 border rounded overflow-y-auto text-sm"
+                        class="h-96 p-3 bg-gray-50 dark:bg-zinc-700 border rounded overflow-y-auto text-sm markdown-content"
                         style="max-width: none;"
                     >
                         <em>Manual Showdown.js output...</em>
