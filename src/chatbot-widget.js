@@ -146,6 +146,9 @@
         border-left-color: #374151;
         color: #9ca3af;
       }
+      .resource-text {
+        margin-bottom: 0 !important;
+      }
     `;
     document.head.appendChild(style);
 
@@ -629,7 +632,7 @@
         docs.forEach((d, index) => {
           const docDiv = document.createElement("div");
           docDiv.className =
-            "mb-3 p-4 bg-white dark:bg-zinc-800 rounded-lg border border-gray-200 dark:border-zinc-600 shadow-sm";
+            "mb-3 p-4 bg-white dark:bg-zinc-800 rounded-lg border border-gray-200 dark:border-zinc-600 shadow-sm group hover:shadow-md transition-shadow duration-200";
 
           // Clean and truncate text
           const cleanText = d.snippet.replace(/\n/g, " ").trim();
@@ -645,13 +648,54 @@
                 Source ${index + 1}
               </span>
             </div>
-            <p class="text-sm text-gray-700 dark:text-gray-300 leading-relaxed">
-              ${displayText}
-            </p>
+            <div class="relative">
+              <p class="text-sm text-gray-700 dark:text-gray-300 leading-relaxed resource-text">
+                ${displayText}
+              </p>
+              <button
+                class="copy-doc-btn absolute -bottom-1 -right-1 p-1.5 text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300 hover:bg-white dark:hover:bg-zinc-700 rounded shadow-sm border border-gray-200 dark:border-zinc-600 opacity-0 group-hover:opacity-100 transition-all duration-200"
+                title="Copy to clipboard"
+                data-text="${cleanText.replace(/"/g, "&quot;")}"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                </svg>
+              </button>
+            </div>
           `;
 
           content.appendChild(docDiv);
         });
+
+        // Add copy functionality to all copy buttons in this content block
+        content.addEventListener("click", (e) => {
+          const copyBtn = e.target.closest(".copy-doc-btn");
+          if (copyBtn) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            const textToCopy = copyBtn.getAttribute("data-text");
+
+            // Use the modern clipboard API
+            if (navigator.clipboard && window.isSecureContext) {
+              navigator.clipboard
+                .writeText(textToCopy)
+                .then(() => {
+                  showCopyFeedback(copyBtn);
+                })
+                .catch((err) => {
+                  console.error("Failed to copy text: ", err);
+                  fallbackCopy(textToCopy);
+                  showCopyFeedback(copyBtn);
+                });
+            } else {
+              // Fallback for older browsers or non-HTTPS
+              fallbackCopy(textToCopy);
+              showCopyFeedback(copyBtn);
+            }
+          }
+        });
+
         wrapper.appendChild(content);
 
         // 5) Toggle logic
@@ -711,6 +755,42 @@
       });
 
       return div;
+    }
+
+    // Helper functions for copy-to-clipboard functionality
+    function fallbackCopy(text) {
+      const textArea = document.createElement("textarea");
+      textArea.value = text;
+      document.body.appendChild(textArea);
+      textArea.select();
+      try {
+        document.execCommand("copy");
+      } catch (err) {
+        console.error("Fallback copy failed: ", err);
+      }
+      document.body.removeChild(textArea);
+    }
+
+    function showCopyFeedback(button) {
+      const originalIcon = button.innerHTML;
+
+      // Show checkmark feedback
+      button.innerHTML = `
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+        </svg>
+      `;
+      button.className = button.className
+        .replace("text-gray-400", "text-green-500")
+        .replace("dark:text-gray-500", "dark:text-green-400");
+
+      // Restore original icon after 2 seconds
+      setTimeout(() => {
+        button.innerHTML = originalIcon;
+        button.className = button.className
+          .replace("text-green-500", "text-gray-400")
+          .replace("dark:text-green-400", "dark:text-gray-500");
+      }, 2000);
     }
 
     function getFullChatHistory() {
