@@ -51,6 +51,94 @@
   async function initChatbot() {
     await loadDependencies();
 
+    // Add custom CSS for markdown content
+    const style = document.createElement('style');
+    style.textContent = `
+      .markdown-content h1, .markdown-content h2, .markdown-content h3,
+      .markdown-content h4, .markdown-content h5, .markdown-content h6 {
+        font-weight: bold;
+        margin-top: 1.5em;
+        margin-bottom: 0.5em;
+      }
+      .markdown-content h1 { font-size: 1.5em; }
+      .markdown-content h2 { font-size: 1.3em; }
+      .markdown-content h3 { font-size: 1.1em; }
+      .markdown-content p {
+        margin-bottom: 1em;
+      }
+      .markdown-content ul, .markdown-content ol {
+        margin: 1em 0;
+        padding-left: 1.5em;
+      }
+      .markdown-content ul {
+        list-style-type: disc;
+      }
+      .markdown-content ol {
+        list-style-type: decimal;
+      }
+      .markdown-content ul ul {
+        list-style-type: circle;
+      }
+      .markdown-content ul ul ul {
+        list-style-type: square;
+      }
+      .markdown-content li {
+        margin: 0.25em 0;
+        display: list-item;
+      }
+      .markdown-content table {
+        border-collapse: collapse;
+        width: 100%;
+        margin: 1em 0;
+      }
+      .markdown-content th, .markdown-content td {
+        border: 1px solid #e5e7eb;
+        padding: 0.5em;
+        text-align: left;
+      }
+      .markdown-content th {
+        background-color: #f9fafb;
+        font-weight: bold;
+      }
+      .markdown-content code {
+        background-color: #f1f5f9;
+        padding: 0.125em 0.25em;
+        border-radius: 0.25em;
+        font-family: monospace;
+        font-size: 0.875em;
+      }
+      .markdown-content pre {
+        background-color: #f8fafc;
+        padding: 1em;
+        border-radius: 0.5em;
+        overflow-x: auto;
+        margin: 1em 0;
+      }
+      .markdown-content blockquote {
+        border-left: 4px solid #e5e7eb;
+        padding-left: 1em;
+        margin: 1em 0;
+        color: #6b7280;
+      }
+      .dark .markdown-content th, .dark .markdown-content td {
+        border-color: #374151;
+      }
+      .dark .markdown-content th {
+        background-color: #1f2937;
+      }
+      .dark .markdown-content code {
+        background-color: #374151;
+      }
+      .dark .markdown-content pre {
+        background-color: #1f2937;
+      }
+      .dark .markdown-content blockquote {
+        border-left-color: #374151;
+        color: #9ca3af;
+      }
+    `;
+    document.head.appendChild(style);
+
     const toggleBtn = document.createElement("button");
     toggleBtn.className =
       "fixed bottom-6 right-6 w-16 h-16 rounded-full bg-white/20 dark:bg-zinc-950/20 backdrop-blur-md flex items-center justify-center shadow-xl hover:bg-white/40 dark:hover:bg-zinc-950/40 transition duration-300 z-50";
@@ -240,7 +328,7 @@
 
     function appendMessage(text, from, timestamp = null, docs = []) {
       const div = document.createElement("div");
-      div.className = `py-2 px-4 rounded-lg prose prose-sm overflow-x-auto whitespace-pre-wrap break-words ${
+      div.className = `py-2 px-4 rounded-lg overflow-x-auto break-words markdown-content ${
         from === "user"
           ? "bg-gray-100 dark:bg-zinc-800 self-end ml-auto mr-4 text-right max-w-[60%]"
           : "self-center mx-auto text-left w-full"
@@ -251,7 +339,7 @@
         : new Date().toLocaleString();
 
       const timeDiv = document.createElement("div");
-      timeDiv.className = "text-xs text-gray-400 -mt-2";
+      timeDiv.className = "text-xs text-gray-400 mt-2 pt-2 border-t border-gray-200 dark:border-gray-600";
       timeDiv.textContent = timeStr;
 
       // Render ALL messages as Markdown
@@ -412,7 +500,7 @@
       input.value = "";
 
       // Create response message that we'll update during streaming
-      let botAnswer = "";
+      let botAnswerRaw = "";  // Keep track of raw markdown text
       let docs = [];
       const botMessageDiv = appendMessage("", "bot");
 
@@ -460,18 +548,18 @@
                 const data = JSON.parse(line.slice(6));
 
                 if (data.type === "token") {
-                  botAnswer = data.partial_answer || "";
-                  // Update the message content with streaming tokens
+                  botAnswerRaw = data.partial_answer || "";
+                  // Update the message content with streaming tokens (render current raw text)
                   const contentDiv =
                     botMessageDiv.querySelector(".prose") || botMessageDiv;
-                  contentDiv.innerHTML = marked.parse(botAnswer);
+                  contentDiv.innerHTML = marked.parse(botAnswerRaw);
                   // Scroll to bottom as we stream
                   body.scrollTop = body.scrollHeight;
                 } else if (data.type === "documents") {
                   docs = data.data || [];
                 } else if (data.type === "status") {
                   // Show status updates
-                  if (!botAnswer) {
+                  if (!botAnswerRaw) {
                     const contentDiv =
                       botMessageDiv.querySelector(".prose") || botMessageDiv;
                     contentDiv.innerHTML = `<em>${data.message}</em>`;
@@ -488,11 +576,11 @@
         }
 
         // Final processing after streaming is complete
-        if (botAnswer) {
+        if (botAnswerRaw) {
           // Remove old content and re-render with documents
           botMessageDiv.remove();
-          appendMessage(botAnswer, "bot", null, docs);
-          saveMessage(botAnswer, "bot", null, docs);
+          appendMessage(botAnswerRaw, "bot", null, docs);
+          saveMessage(botAnswerRaw, "bot", null, docs);
         } else {
           botMessageDiv.remove();
           const failMsg = "_Sorry, I couldn't generate a response._";
