@@ -619,22 +619,38 @@
 
         // 3) Content container, hidden by default
         const content = document.createElement("div");
-        content.className = "overflow-hidden";
+        content.className = "overflow-hidden px-4";
         content.style.height = "0px";
         content.style.opacity = "0";
         content.style.transition = "height 0.3s ease, opacity 0.2s ease";
         content.style.willChange = "height, opacity";
 
         // 4) Fill in each document snippet
-        docs.forEach((d) => {
-          const p = document.createElement("div");
-          p.className =
-            "m-2 text-sm text-gray-700 dark:text-gray-200 bg-white dark:bg-zinc-950 rounded-md shadow-xs dark:shadow-zinc-800";
-          p.innerHTML = `
-            <strong>${d.id}</strong> (score: ${d.score.toFixed(2)})<br>
-            ${d.snippet.replace(/\n/g, "<br>")}…
+        docs.forEach((d, index) => {
+          const docDiv = document.createElement("div");
+          docDiv.className =
+            "mb-3 p-4 bg-white dark:bg-zinc-800 rounded-lg border border-gray-200 dark:border-zinc-600 shadow-sm";
+
+          // Clean and truncate text
+          const cleanText = d.snippet.replace(/\n/g, " ").trim();
+          const maxLength = 300;
+          const displayText =
+            cleanText.length > maxLength
+              ? cleanText.substring(0, maxLength) + "..."
+              : cleanText;
+
+          docDiv.innerHTML = `
+            <div class="flex items-start justify-between mb-2">
+              <span class="text-xs font-medium text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20 px-2 py-1 rounded-full">
+                Source ${index + 1}
+              </span>
+            </div>
+            <p class="text-sm text-gray-700 dark:text-gray-300 leading-relaxed">
+              ${displayText}
+            </p>
           `;
-          content.appendChild(p);
+
+          content.appendChild(docDiv);
         });
         wrapper.appendChild(content);
 
