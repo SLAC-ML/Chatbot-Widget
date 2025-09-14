@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Markdown Rendering Test</title>
+
+    <!-- Tailwind CSS -->
+    <style type="text/tailwindcss">
+      @import "tailwindcss";
+      @custom-variant dark (&:where(.dark, .dark *));
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+
+    <!-- Markdown rendering libraries -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/markdown-it@13.0.1/dist/markdown-it.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/showdown@2.1.0/dist/showdown.min.js"></script>
+
+    <!-- MathJax -->
+    <script>
+        MathJax = {
+            tex: {
+                inlineMath: [["$", "$"]],
+                displayMath: [["$$", "$$"]],
+            },
+            chtml: {
+                scale: 1,
+            },
+        };
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+
+    <!-- Custom CSS matching chatbot widget -->
+    <style>
+        .markdown-content h1, .markdown-content h2, .markdown-content h3,
+        .markdown-content h4, .markdown-content h5, .markdown-content h6 {
+            font-weight: bold;
+            margin-top: 1.5em;
+            margin-bottom: 0.5em;
+        }
+        .markdown-content h1 { font-size: 1.5em; }
+        .markdown-content h2 { font-size: 1.3em; }
+        .markdown-content h3 { font-size: 1.1em; }
+        .markdown-content p {
+            margin-bottom: 1em;
+        }
+        .markdown-content ul, .markdown-content ol {
+            margin: 1em 0;
+            padding-left: 1.5em;
+        }
+        .markdown-content ul {
+            list-style-type: disc;
+        }
+        .markdown-content ol {
+            list-style-type: decimal;
+        }
+        .markdown-content ul ul {
+            list-style-type: circle;
+        }
+        .markdown-content ul ul ul {
+            list-style-type: square;
+        }
+        .markdown-content li {
+            margin: 0.25em 0;
+            display: list-item;
+        }
+        .markdown-content table {
+            border-collapse: collapse;
+            width: 100%;
+            margin: 1em 0;
+        }
+        .markdown-content th, .markdown-content td {
+            border: 1px solid #e5e7eb;
+            padding: 0.5em;
+            text-align: left;
+        }
+        .markdown-content th {
+            background-color: #f9fafb;
+            font-weight: bold;
+        }
+        .markdown-content code {
+            background-color: #f1f5f9;
+            padding: 0.125em 0.25em;
+            border-radius: 0.25em;
+            font-family: monospace;
+            font-size: 1em;
+        }
+        .markdown-content pre {
+            background-color: #f8fafc;
+            padding: 1em;
+            border-radius: 0.5em;
+            overflow-x: auto;
+            margin: 1em 0;
+            font-size: 1em;
+        }
+        .markdown-content pre code {
+            background-color: transparent;
+            padding: 0;
+            border-radius: 0;
+            font-size: inherit;
+        }
+        .markdown-content blockquote {
+            border-left: 4px solid #e5e7eb;
+            padding-left: 1em;
+            margin: 1em 0;
+            color: #6b7280;
+        }
+        .dark .markdown-content th, .dark .markdown-content td {
+            border-color: #374151;
+        }
+        .dark .markdown-content th {
+            background-color: #1f2937;
+        }
+        .dark .markdown-content code {
+            background-color: #374151;
+        }
+        .dark .markdown-content pre {
+            background-color: #1f2937;
+        }
+        .dark .markdown-content pre code {
+            background-color: transparent;
+        }
+        .dark .markdown-content blockquote {
+            border-left-color: #374151;
+            color: #9ca3af;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 dark:bg-zinc-900 text-gray-900 dark:text-gray-100">
+    <div class="container mx-auto p-6">
+        <h1 class="text-2xl font-bold mb-6">Markdown Rendering Test</h1>
+
+        <!-- Streaming API Test -->
+        <div class="mb-8">
+            <h2 class="text-2xl font-bold mb-6">Streaming API Test</h2>
+
+            <div class="mb-6">
+                <button
+                    id="test-btn"
+                    class="px-6 py-3 bg-blue-500 hover:bg-blue-600 text-white rounded-lg font-medium"
+                >
+                    Test Query: "What is the workflow of using NNBAX to optimize DA/MA?"
+                </button>
+            </div>
+
+            <!-- Raw Streaming Text -->
+            <div class="bg-white dark:bg-zinc-800 rounded-lg p-4 shadow mb-6">
+                <h3 class="text-lg font-semibold mb-3">Raw Streaming Text</h3>
+                <textarea
+                    id="raw-text"
+                    class="w-full h-32 p-3 bg-gray-50 dark:bg-zinc-700 border rounded font-mono text-sm resize-none"
+                    placeholder="Raw markdown text will appear here during streaming..."
+                    readonly
+                ></textarea>
+            </div>
+
+            <!-- Streaming Test Results -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- Marked.js -->
+                <div class="bg-white dark:bg-zinc-800 rounded-lg p-4 shadow">
+                    <h3 class="text-lg font-semibold mb-3">Marked.js</h3>
+                <div
+                    id="marked-output"
+                    class="h-96 p-3 bg-gray-50 dark:bg-zinc-700 border rounded overflow-y-auto text-sm markdown-content"
+                    style="max-width: none;"
+                >
+                    <em>Marked.js output...</em>
+                </div>
+            </div>
+
+                <!-- Markdown-it -->
+                <div class="bg-white dark:bg-zinc-800 rounded-lg p-4 shadow">
+                    <h3 class="text-lg font-semibold mb-3">Markdown-it</h3>
+                    <div
+                        id="markdown-it-output"
+                        class="h-96 p-3 bg-gray-50 dark:bg-zinc-700 border rounded overflow-y-auto text-sm markdown-content"
+                        style="max-width: none;"
+                    >
+                        <em>Markdown-it output...</em>
+                    </div>
+                </div>
+
+                <!-- Showdown.js -->
+                <div class="bg-white dark:bg-zinc-800 rounded-lg p-4 shadow">
+                    <h3 class="text-lg font-semibold mb-3">Showdown.js</h3>
+                    <div
+                        id="showdown-output"
+                        class="h-96 p-3 bg-gray-50 dark:bg-zinc-700 border rounded overflow-y-auto text-sm markdown-content"
+                        style="max-width: none;"
+                    >
+                        <em>Showdown.js output...</em>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Manual Test Area -->
+        <div class="mt-8">
+            <h2 class="text-2xl font-bold mb-6">Manual Test</h2>
+
+            <!-- Manual Input Area -->
+            <div class="bg-white dark:bg-zinc-800 rounded-lg p-4 shadow mb-6">
+                <h3 class="text-lg font-semibold mb-3">Input Markdown</h3>
+                <textarea
+                    id="manual-input"
+                    class="w-full h-32 p-3 bg-gray-50 dark:bg-zinc-700 border rounded font-mono text-sm resize-none"
+                    placeholder="Edit markdown text here to test rendering (auto-updates as you type)..."
+                ></textarea>
+            </div>
+
+            <!-- Manual Test Results -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- Marked.js -->
+                <div class="bg-white dark:bg-zinc-800 rounded-lg p-4 shadow">
+                    <h3 class="text-lg font-semibold mb-3">Marked.js</h3>
+                    <div
+                        id="manual-marked"
+                        class="h-96 p-3 bg-gray-50 dark:bg-zinc-700 border rounded overflow-y-auto text-sm markdown-content"
+                        style="max-width: none;"
+                    >
+                        <em>Manual Marked.js output...</em>
+                    </div>
+                </div>
+
+                <!-- Markdown-it -->
+                <div class="bg-white dark:bg-zinc-800 rounded-lg p-4 shadow">
+                    <h3 class="text-lg font-semibold mb-3">Markdown-it</h3>
+                    <div
+                        id="manual-markdown-it"
+                        class="h-96 p-3 bg-gray-50 dark:bg-zinc-700 border rounded overflow-y-auto text-sm markdown-content"
+                        style="max-width: none;"
+                    >
+                        <em>Manual Markdown-it output...</em>
+                    </div>
+                </div>
+
+                <!-- Showdown.js -->
+                <div class="bg-white dark:bg-zinc-800 rounded-lg p-4 shadow">
+                    <h3 class="text-lg font-semibold mb-3">Showdown.js</h3>
+                    <div
+                        id="manual-showdown"
+                        class="h-96 p-3 bg-gray-50 dark:bg-zinc-700 border rounded overflow-y-auto text-sm markdown-content"
+                        style="max-width: none;"
+                    >
+                        <em>Manual Showdown.js output...</em>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const testBtn = document.getElementById('test-btn');
+        const rawText = document.getElementById('raw-text');
+
+        // Output elements
+        const markedOutput = document.getElementById('marked-output');
+        const markdownItOutput = document.getElementById('markdown-it-output');
+        const showdownOutput = document.getElementById('showdown-output');
+
+        const manualInput = document.getElementById('manual-input');
+
+        // Manual output elements
+        const manualMarked = document.getElementById('manual-marked');
+        const manualMarkdownIt = document.getElementById('manual-markdown-it');
+        const manualShowdown = document.getElementById('manual-showdown');
+
+        // Wait for libraries to load, then initialize
+        let md, showdownConverter;
+
+        window.addEventListener('load', () => {
+            // Initialize markdown renderers after libraries are loaded
+            if (typeof markdownit !== 'undefined') {
+                md = markdownit({
+                    html: true,
+                    breaks: false,
+                    linkify: true,
+                    typographer: true
+                });
+            }
+
+            if (typeof showdown !== 'undefined') {
+                showdownConverter = new showdown.Converter({
+                    tables: true,
+                    strikethrough: true,
+                    tasklists: true,
+                    ghCodeBlocks: true
+                });
+            }
+        });
+
+        // Rendering functions
+        function renderWithMarked(text) {
+            try {
+                return marked.parse(text);
+            } catch (e) {
+                return `<em>Marked.js error: ${e.message}</em>`;
+            }
+        }
+
+        function renderWithMarkdownIt(text) {
+            try {
+                return md ? md.render(text) : '<em>Markdown-it not loaded</em>';
+            } catch (e) {
+                return `<em>Markdown-it error: ${e.message}</em>`;
+            }
+        }
+
+        function renderWithShowdown(text) {
+            try {
+                return showdownConverter ? showdownConverter.makeHtml(text) : '<em>Showdown not loaded</em>';
+            } catch (e) {
+                return `<em>Showdown error: ${e.message}</em>`;
+            }
+        }
+
+        function renderAllEngines(text) {
+            // Render with all engines
+            markedOutput.innerHTML = renderWithMarked(text);
+            markdownItOutput.innerHTML = renderWithMarkdownIt(text);
+            showdownOutput.innerHTML = renderWithShowdown(text);
+
+            // Trigger MathJax on all outputs
+            const allOutputs = [markedOutput, markdownItOutput, showdownOutput];
+            MathJax.typesetPromise(allOutputs).then(() => {
+                // Handle display math overflow for all engines
+                allOutputs.forEach(container => {
+                    container.querySelectorAll('mjx-math[display="true"]').forEach((math) => {
+                        const wrapper = document.createElement("div");
+                        wrapper.className = "overflow-x-auto whitespace-nowrap px-2 py-1";
+                        math.replaceWith(wrapper);
+                        wrapper.append(math);
+                    });
+                });
+            });
+        }
+
+        // Test streaming API call
+        testBtn.addEventListener('click', async () => {
+            testBtn.disabled = true;
+            testBtn.textContent = 'Testing...';
+            rawText.value = '';
+
+            markedOutput.innerHTML = '<em>Streaming...</em>';
+            markdownItOutput.innerHTML = '<em>Streaming...</em>';
+            showdownOutput.innerHTML = '<em>Streaming...</em>';
+
+            try {
+                const response = await fetch('http://localhost:8001/ask/stream', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'text/event-stream',
+                    },
+                    body: JSON.stringify({
+                        query: 'What is the workflow of using NNBAX to optimize DA/MA?',
+                        history: [],
+                        embedding_model: 'huggingface:thellert/physbert_cased',
+                        llm_model: 'stanford:gpt-4.omini',
+                        use_rag: true,
+                        max_documents: 5,
+                        score_threshold: 0,
+                        use_opensearch: false,
+                        use_qdrant: true,
+                        knowledge_base: 'mli',
+                        prompt: 'You are a helpful assistant. Output answers in Markdown. Use $ and $$ to surround mathematical formulas. Try to tie your answer to the provided list of sources. Say you dont know if you cant. Be as concise as possible.',
+                        files: []
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+
+                const reader = response.body.getReader();
+                const decoder = new TextDecoder();
+                let botAnswer = '';
+
+                while (true) {
+                    const { done, value } = await reader.read();
+                    if (done) break;
+
+                    const chunk = decoder.decode(value, { stream: true });
+                    const lines = chunk.split('\n');
+
+                    for (const line of lines) {
+                        if (line.startsWith('data: ')) {
+                            try {
+                                const data = JSON.parse(line.slice(6));
+
+                                if (data.type === 'token') {
+                                    botAnswer = data.partial_answer || '';
+
+                                    // Update raw text
+                                    rawText.value = botAnswer;
+
+                                    // Render with all engines
+                                    renderAllEngines(botAnswer);
+
+                                    // Auto scroll to bottom
+                                    rawText.scrollTop = rawText.scrollHeight;
+                                    markedOutput.scrollTop = markedOutput.scrollHeight;
+                                    markdownItOutput.scrollTop = markdownItOutput.scrollHeight;
+                                    showdownOutput.scrollTop = showdownOutput.scrollHeight;
+                                }
+                            } catch (parseError) {
+                                continue;
+                            }
+                        }
+                    }
+                }
+
+            } catch (error) {
+                console.error('Error:', error);
+                markedOutput.innerHTML = `<strong>Error:</strong> ${error.message}`;
+                markdownItOutput.innerHTML = `<strong>Error:</strong> ${error.message}`;
+                showdownOutput.innerHTML = `<strong>Error:</strong> ${error.message}`;
+            } finally {
+                testBtn.disabled = false;
+                testBtn.textContent = 'Test Query: "What is the workflow of using NNBAX to optimize DA/MA?"';
+            }
+        });
+
+        function renderManualInputs(text) {
+            if (text) {
+                manualMarked.innerHTML = renderWithMarked(text);
+                manualMarkdownIt.innerHTML = renderWithMarkdownIt(text);
+                manualShowdown.innerHTML = renderWithShowdown(text);
+
+                // Trigger MathJax
+                MathJax.typesetPromise([manualMarked, manualMarkdownIt, manualShowdown]).then(() => {
+                    [manualMarked, manualMarkdownIt, manualShowdown].forEach(container => {
+                        container.querySelectorAll('mjx-math[display="true"]').forEach((math) => {
+                            const wrapper = document.createElement("div");
+                            wrapper.className = "overflow-x-auto whitespace-nowrap px-2 py-1";
+                            math.replaceWith(wrapper);
+                            wrapper.append(math);
+                        });
+                    });
+                });
+            } else {
+                manualMarked.innerHTML = '<em>Manual Marked.js output...</em>';
+                manualMarkdownIt.innerHTML = '<em>Manual Markdown-it output...</em>';
+                manualShowdown.innerHTML = '<em>Manual Showdown.js output...</em>';
+            }
+        }
+
+
+        // Auto-render as user types
+        manualInput.addEventListener('input', () => {
+            const inputText = manualInput.value.trim();
+            renderManualInputs(inputText);
+        });
+
+        // Add some sample markdown text for testing
+        const sampleMarkdown = `# Sample Markdown
+
+This is a **bold** text and this is *italic*.
+
+## Math Examples
+
+Inline math: $E = mc^2$
+
+Display math:
+$$\\sum_{i=1}^{n} x_i = \\frac{n(n+1)}{2}$$
+
+## Lists
+
+- First item
+- Second item
+  - Nested item
+  - Another nested
+
+1. Numbered item
+2. Another numbered
+
+## Code
+
+\`inline code\`
+
+\`\`\`javascript
+function hello() {
+    console.log("Hello world!");
+}
+\`\`\`
+
+## Table
+
+| Header 1 | Header 2 |
+|----------|----------|
+| Cell 1   | Cell 2   |
+`;
+
+        // Load sample after a short delay to ensure all libraries are loaded
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                manualInput.value = sampleMarkdown;
+                renderManualInputs(sampleMarkdown);
+            }, 500);
+        });
+    </script>
+</body>
+</html>
