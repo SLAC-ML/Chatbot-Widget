@@ -197,10 +197,13 @@
             <button
               id="chatbot-use-rag"
               title="Use RAG (experimental)"
-              class="text-base text-gray-900 dark:text-gray-100 px-4 py-4 transition hover:bg-black/10 dark:hover:bg-white/10 flex items-center gap-2"
+              class="text-base px-4 py-4 transition hover:bg-black/10 dark:hover:bg-white/10 flex items-center gap-2"
+              data-rag-enabled="false"
             >
-              <input type="checkbox" id="use-rag-checkbox" class="mr-2" />
-              <span class="text-sm">RAG</span>
+              <div class="w-8 h-4 bg-gray-300 dark:bg-gray-600 rounded-full relative transition-all duration-300 ease-in-out" id="rag-toggle-track">
+                <div class="w-3 h-3 bg-white rounded-full absolute top-0.5 left-0.5 transition-all duration-300 ease-in-out" id="rag-toggle-thumb"></div>
+              </div>
+              <span class="text-sm text-gray-900 dark:text-gray-100">RAG</span>
             </button>
             <button
               id="chatbot-theme-toggle"
@@ -266,9 +269,12 @@
                 <button
                   id="chatbot-use-rag-mobile"
                   class="w-full px-4 py-3 text-sm text-gray-900 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-zinc-700 transition flex items-center justify-between"
+                  data-rag-enabled="false"
                 >
                   <span>Use RAG</span>
-                  <input type="checkbox" id="use-rag-checkbox-mobile" class="ml-2" />
+                  <div class="w-8 h-4 bg-gray-300 dark:bg-gray-600 rounded-full relative transition-all duration-300 ease-in-out" id="rag-toggle-track-mobile">
+                    <div class="w-3 h-3 bg-white rounded-full absolute top-0.5 left-0.5 transition-all duration-300 ease-in-out" id="rag-toggle-thumb-mobile"></div>
+                  </div>
                 </button>
               </div>
             </div>
@@ -307,38 +313,83 @@
 
     // Close mobile menu when clicking outside
     document.addEventListener("click", (e) => {
-      if (!mobileDropdown.classList.contains("hidden") && !mobileDropdown.contains(e.target)) {
+      if (
+        !mobileDropdown.classList.contains("hidden") &&
+        !mobileDropdown.contains(e.target)
+      ) {
         mobileDropdown.classList.add("hidden");
       }
     });
 
-    // Use RAG functionality for both desktop and mobile
+    // Modern RAG toggle functionality
     const useRagButton = container.querySelector("#chatbot-use-rag");
-    const useRagCheckbox = container.querySelector("#use-rag-checkbox");
-    const useRagButtonMobile = container.querySelector("#chatbot-use-rag-mobile");
-    const useRagCheckboxMobile = container.querySelector("#use-rag-checkbox-mobile");
+    const useRagButtonMobile = container.querySelector(
+      "#chatbot-use-rag-mobile"
+    );
+    const ragToggleTrack = container.querySelector("#rag-toggle-track");
+    const ragToggleThumb = container.querySelector("#rag-toggle-thumb");
+    const ragToggleTrackMobile = container.querySelector(
+      "#rag-toggle-track-mobile"
+    );
+    const ragToggleThumbMobile = container.querySelector(
+      "#rag-toggle-thumb-mobile"
+    );
 
-    // Desktop Use RAG functionality
-    if (useRagButton && useRagCheckbox) {
+    let ragEnabled = false;
+
+    function updateRagToggleVisual(button, track, thumb, enabled) {
+      if (enabled) {
+        // Enabled state - neon blue
+        track.className =
+          "w-8 h-4 bg-blue-500 rounded-full relative transition-all duration-300 ease-in-out";
+        thumb.className =
+          "w-3 h-3 bg-white rounded-full absolute top-0.5 right-0.5 transition-all duration-300 ease-in-out shadow-md";
+        button.setAttribute("data-rag-enabled", "true");
+      } else {
+        // Disabled state - gray
+        track.className =
+          "w-8 h-4 bg-gray-300 dark:bg-gray-600 rounded-full relative transition-all duration-300 ease-in-out";
+        thumb.className =
+          "w-3 h-3 bg-white rounded-full absolute top-0.5 left-0.5 transition-all duration-300 ease-in-out";
+        button.setAttribute("data-rag-enabled", "false");
+      }
+    }
+
+    function toggleRag() {
+      ragEnabled = !ragEnabled;
+
+      // Update both desktop and mobile visuals
+      if (useRagButton && ragToggleTrack && ragToggleThumb) {
+        updateRagToggleVisual(
+          useRagButton,
+          ragToggleTrack,
+          ragToggleThumb,
+          ragEnabled
+        );
+      }
+      if (useRagButtonMobile && ragToggleTrackMobile && ragToggleThumbMobile) {
+        updateRagToggleVisual(
+          useRagButtonMobile,
+          ragToggleTrackMobile,
+          ragToggleThumbMobile,
+          ragEnabled
+        );
+      }
+    }
+
+    // Desktop RAG toggle
+    if (useRagButton) {
       useRagButton.addEventListener("click", (e) => {
         e.preventDefault();
-        useRagCheckbox.checked = !useRagCheckbox.checked;
-        // Sync with mobile checkbox
-        if (useRagCheckboxMobile) {
-          useRagCheckboxMobile.checked = useRagCheckbox.checked;
-        }
+        toggleRag();
       });
     }
 
-    // Mobile Use RAG functionality
-    if (useRagButtonMobile && useRagCheckboxMobile) {
+    // Mobile RAG toggle
+    if (useRagButtonMobile) {
       useRagButtonMobile.addEventListener("click", (e) => {
         e.preventDefault();
-        useRagCheckboxMobile.checked = !useRagCheckboxMobile.checked;
-        // Sync with desktop checkbox
-        if (useRagCheckbox) {
-          useRagCheckbox.checked = useRagCheckboxMobile.checked;
-        }
+        toggleRag();
         mobileDropdown.classList.add("hidden"); // Close menu after action
       });
     }
@@ -348,9 +399,12 @@
 
     //  ——— Theme management ———
     const themeToggleBtn = container.querySelector("#chatbot-theme-toggle");
-    const themeToggleMobile = container.querySelector("#chatbot-theme-toggle-mobile");
+    const themeToggleMobile = container.querySelector(
+      "#chatbot-theme-toggle-mobile"
+    );
     const themeIcon = themeToggleBtn?.querySelector("#theme-icon");
-    const themeIconMobile = themeToggleMobile?.querySelector("#theme-icon-mobile");
+    const themeIconMobile =
+      themeToggleMobile?.querySelector("#theme-icon-mobile");
 
     // 1) Load saved or system theme
     let theme = localStorage.getItem("chatbot-theme");
@@ -398,7 +452,9 @@
 
     // Button event handlers for both desktop and mobile
     const downloadBtn = container.querySelector("#chatbot-download");
-    const downloadBtnMobile = container.querySelector("#chatbot-download-mobile");
+    const downloadBtnMobile = container.querySelector(
+      "#chatbot-download-mobile"
+    );
     const resetBtn = container.querySelector("#chatbot-reset");
     const resetBtnMobile = container.querySelector("#chatbot-reset-mobile");
 
@@ -695,7 +751,7 @@
             history: extractChatRecords(),
             embedding_model: "huggingface:thellert/physbert_cased",
             llm_model: "stanford:gpt-4.omini",
-            use_rag: useRagCheckbox.checked,
+            use_rag: ragEnabled,
             max_documents: 5,
             score_threshold: 0,
             use_opensearch: false,
