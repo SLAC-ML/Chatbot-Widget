@@ -170,8 +170,8 @@
 
     container.innerHTML = `
       <div class="relative flex-1 overflow-hidden bg-white dark:bg-zinc-950">
-        <div id="chatbot-body" class="absolute top-0 left-0 right-0 bottom-16 px-[clamp(1rem,calc((100vw-1024px)/2),100rem)] pt-16 pb-8 space-y-2 overflow-y-auto bg-white dark:bg-zinc-950 text-black dark:text-gray-100"></div>
-        <div id="chatbot-header" class="absolute top-0 w-full h-14 bg-white/20 backdrop-blur-md border-b border-gray-200 dark:border-zinc-600 text-gray-800 dark:text-gray-100 text-base font-semibold flex justify-between items-center px-[clamp(1rem,calc((100vw-1024px)/2),100rem)]">
+        <div id="chatbot-body" class="absolute top-0 left-0 right-0 bottom-16 px-[clamp(1rem,calc((100vw-720px)/2),100rem)] pt-16 pb-8 space-y-2 overflow-y-auto bg-white dark:bg-zinc-950 text-black dark:text-gray-100"></div>
+        <div id="chatbot-header" class="absolute top-0 w-full h-14 bg-white/20 backdrop-blur-md border-b border-gray-200 dark:border-zinc-600 text-gray-800 dark:text-gray-100 text-base font-semibold flex justify-between items-center px-[clamp(1rem,calc((100vw-720px)/2),100rem)]">
           <span>${cfg.chatbotName}</span>
           <div class="flex gap-0">
             <button
@@ -208,7 +208,7 @@
             </button>
           </div>
         </div>
-        <div id="chatbot-footer" class="absolute bottom-0 w-full flex flex-col items-center px-[clamp(1rem,calc((100vw-1024px)/2),100rem)] py-4">
+        <div id="chatbot-footer" class="absolute bottom-0 w-full flex flex-col items-center px-[clamp(1rem,calc((100vw-720px)/2),100rem)] py-4">
           <div class="flex bg-white dark:bg-zinc-800 rounded-3xl shadow-lg border border-gray-300 dark:border-zinc-600 w-full">
             <textarea
               id="chatbot-input"
