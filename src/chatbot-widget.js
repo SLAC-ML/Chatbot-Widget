@@ -173,39 +173,105 @@
         <div id="chatbot-body" class="absolute top-0 left-0 right-0 bottom-16 px-[clamp(1rem,calc((100vw-720px)/2),100rem)] pt-16 pb-8 space-y-2 overflow-y-auto bg-white dark:bg-zinc-950 text-black dark:text-gray-100"></div>
         <div id="chatbot-header" class="absolute top-0 w-full h-14 bg-white/20 backdrop-blur-md border-b border-gray-200 dark:border-zinc-600 text-gray-800 dark:text-gray-100 text-base font-semibold flex justify-between items-center px-[clamp(1rem,calc((100vw-720px)/2),100rem)]">
           <span>${cfg.chatbotName}</span>
-          <div class="flex gap-0">
+
+          <!-- Desktop buttons (hidden on mobile) -->
+          <div class="hidden md:flex gap-0">
             <button
               id="chatbot-download"
-              class="text-base text-gray-900 dark:text-gray-100 px-4 py-4 transition hover:bg-black/10 dark:hover:bg-white/10"
+              title="Save chat history"
+              class="text-base text-gray-900 dark:text-gray-100 px-4 py-4 transition hover:bg-black/10 dark:hover:bg-white/10 flex items-center justify-center"
             >
-              Save Chat
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+              </svg>
             </button>
             <button
               id="chatbot-reset"
-              class="text-base text-gray-900 dark:text-gray-100 px-4 py-4 transition hover:bg-black/10 dark:hover:bg-white/10"
+              title="Start new chat"
+              class="text-base text-gray-900 dark:text-gray-100 px-4 py-4 transition hover:bg-black/10 dark:hover:bg-white/10 flex items-center justify-center"
             >
-              New Chat
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+              </svg>
             </button>
             <button
               id="chatbot-use-rag"
+              title="Use RAG (experimental)"
               class="text-base text-gray-900 dark:text-gray-100 px-4 py-4 transition hover:bg-black/10 dark:hover:bg-white/10 flex items-center gap-2"
             >
               <input type="checkbox" id="use-rag-checkbox" class="mr-2" />
-              Use RAG
+              <span class="text-sm">RAG</span>
             </button>
             <button
               id="chatbot-theme-toggle"
-              aria-label="Toggle light/dark theme"
+              title="Toggle light/dark theme"
               class="text-base text-gray-900 dark:text-gray-100 px-4 py-4 transition hover:bg-black/10 dark:hover:bg-white/10 flex items-center justify-center"
             >
-              <!-- We'll swap this icon in JS -->
               <svg id="theme-icon" xmlns="http://www.w3.org/2000/svg" class="w-6 h-6"
                   fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                <!-- placeholder: sun by default -->
                 <path stroke-linecap="round" stroke-linejoin="round"
                       d="M12 3v2m0 14v2m9-9h-2M5 12H3m15.364-6.364l-1.414 1.414M7.05 16.95l-1.414 1.414M17.364 17.364l-1.414-1.414M7.05 7.05L5.636 5.636" />
               </svg>
             </button>
+          </div>
+
+          <!-- Mobile menu button (visible on mobile) -->
+          <div class="md:hidden relative">
+            <button
+              id="chatbot-mobile-menu"
+              class="text-base text-gray-900 dark:text-gray-100 px-4 py-4 transition hover:bg-black/10 dark:hover:bg-white/10 flex items-center justify-center"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 5v.01M12 12v.01M12 19v.01" />
+              </svg>
+            </button>
+
+            <!-- Mobile dropdown menu -->
+            <div id="chatbot-mobile-dropdown" class="absolute right-0 top-full mt-1 w-48 bg-white dark:bg-zinc-800 rounded-lg shadow-xl border border-gray-200 dark:border-zinc-600 hidden z-50">
+              <div class="py-2">
+                <button
+                  id="chatbot-download-mobile"
+                  class="w-full px-4 py-3 text-sm text-gray-900 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-zinc-700 transition flex items-center gap-3"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                  </svg>
+                  <span>Save Chat</span>
+                </button>
+                <button
+                  id="chatbot-reset-mobile"
+                  class="w-full px-4 py-3 text-sm text-gray-900 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-zinc-700 transition flex items-center gap-3"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+                  </svg>
+                  <span>New Chat</span>
+                </button>
+                <button
+                  id="chatbot-theme-toggle-mobile"
+                  class="w-full px-4 py-3 text-sm text-gray-900 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-zinc-700 transition flex items-center justify-between"
+                >
+                  <div class="flex items-center gap-3">
+                    <svg id="theme-icon-mobile" xmlns="http://www.w3.org/2000/svg" class="w-4 h-4"
+                        fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                      <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M12 3v2m0 14v2m9-9h-2M5 12H3m15.364-6.364l-1.414 1.414M7.05 16.95l-1.414 1.414M17.364 17.364l-1.414-1.414M7.05 7.05L5.636 5.636" />
+                    </svg>
+                    <span>Toggle Theme</span>
+                  </div>
+                </button>
+
+                <hr class="my-2 border-gray-200 dark:border-zinc-600" />
+                <div class="px-4 py-2 text-xs text-gray-500 dark:text-gray-400 font-semibold uppercase">Experimental</div>
+                <button
+                  id="chatbot-use-rag-mobile"
+                  class="w-full px-4 py-3 text-sm text-gray-900 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-zinc-700 transition flex items-center justify-between"
+                >
+                  <span>Use RAG</span>
+                  <input type="checkbox" id="use-rag-checkbox-mobile" class="ml-2" />
+                </button>
+              </div>
+            </div>
           </div>
         </div>
         <div id="chatbot-footer" class="absolute bottom-0 w-full flex flex-col items-center px-[clamp(1rem,calc((100vw-720px)/2),100rem)] py-4">
@@ -230,21 +296,61 @@
       </div>
     `;
 
-    // Add event listener to toggle checkbox state when button is clicked
+    // Mobile menu toggle functionality
+    const mobileMenuBtn = container.querySelector("#chatbot-mobile-menu");
+    const mobileDropdown = container.querySelector("#chatbot-mobile-dropdown");
+
+    mobileMenuBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      mobileDropdown.classList.toggle("hidden");
+    });
+
+    // Close mobile menu when clicking outside
+    document.addEventListener("click", (e) => {
+      if (!mobileDropdown.classList.contains("hidden") && !mobileDropdown.contains(e.target)) {
+        mobileDropdown.classList.add("hidden");
+      }
+    });
+
+    // Use RAG functionality for both desktop and mobile
     const useRagButton = container.querySelector("#chatbot-use-rag");
     const useRagCheckbox = container.querySelector("#use-rag-checkbox");
+    const useRagButtonMobile = container.querySelector("#chatbot-use-rag-mobile");
+    const useRagCheckboxMobile = container.querySelector("#use-rag-checkbox-mobile");
 
-    useRagButton.addEventListener("click", (e) => {
-      e.preventDefault(); // Prevent default button behavior
-      useRagCheckbox.checked = !useRagCheckbox.checked; // Toggle checkbox state
-    });
+    // Desktop Use RAG functionality
+    if (useRagButton && useRagCheckbox) {
+      useRagButton.addEventListener("click", (e) => {
+        e.preventDefault();
+        useRagCheckbox.checked = !useRagCheckbox.checked;
+        // Sync with mobile checkbox
+        if (useRagCheckboxMobile) {
+          useRagCheckboxMobile.checked = useRagCheckbox.checked;
+        }
+      });
+    }
+
+    // Mobile Use RAG functionality
+    if (useRagButtonMobile && useRagCheckboxMobile) {
+      useRagButtonMobile.addEventListener("click", (e) => {
+        e.preventDefault();
+        useRagCheckboxMobile.checked = !useRagCheckboxMobile.checked;
+        // Sync with desktop checkbox
+        if (useRagCheckbox) {
+          useRagCheckbox.checked = useRagCheckboxMobile.checked;
+        }
+        mobileDropdown.classList.add("hidden"); // Close menu after action
+      });
+    }
 
     document.body.appendChild(toggleBtn);
     document.body.appendChild(container);
 
     //  ——— Theme management ———
     const themeToggleBtn = container.querySelector("#chatbot-theme-toggle");
-    const themeIcon = themeToggleBtn.querySelector("#theme-icon");
+    const themeToggleMobile = container.querySelector("#chatbot-theme-toggle-mobile");
+    const themeIcon = themeToggleBtn?.querySelector("#theme-icon");
+    const themeIconMobile = themeToggleMobile?.querySelector("#theme-icon-mobile");
 
     // 1) Load saved or system theme
     let theme = localStorage.getItem("chatbot-theme");
@@ -256,30 +362,89 @@
 
     // 2) Apply it to <html> so Tailwind dark: classes take effect
     document.documentElement.classList.toggle("dark", theme === "dark");
+
     // 3) Set the correct icon (sun for light, moon for dark)
-    function updateIcon() {
+    function updateIcons() {
+      const moonPath = `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12.79A9 9 0 1111.21 3a7 7 0 109.79 9.79z" />`;
+      const sunPath = `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v2m0 14v2m9-9h-2M5 12H3m15.364-6.364l-1.414 1.414M7.05 16.95l-1.414 1.414 M17.364 17.364l-1.414-1.414M7.05 7.05L5.636 5.636" />`;
+
       if (theme === "dark") {
-        themeIcon.innerHTML = `
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                d="M21 12.79A9 9 0 1111.21 3a7 7 0 109.79 9.79z" />
-        `; // moon
+        if (themeIcon) themeIcon.innerHTML = moonPath;
+        if (themeIconMobile) themeIconMobile.innerHTML = moonPath;
       } else {
-        themeIcon.innerHTML = `
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                d="M12 3v2m0 14v2m9-9h-2M5 12H3m15.364-6.364l-1.414 1.414M7.05 16.95l-1.414 1.414
-                  M17.364 17.364l-1.414-1.414M7.05 7.05L5.636 5.636" />
-        `; // sun
+        if (themeIcon) themeIcon.innerHTML = sunPath;
+        if (themeIconMobile) themeIconMobile.innerHTML = sunPath;
       }
     }
-    updateIcon();
+    updateIcons();
 
-    // 4) Toggle handler
-    themeToggleBtn.addEventListener("click", () => {
+    // 4) Theme toggle handlers
+    function toggleTheme() {
       theme = theme === "dark" ? "light" : "dark";
       document.documentElement.classList.toggle("dark", theme === "dark");
       localStorage.setItem("chatbot-theme", theme);
-      updateIcon();
-    });
+      updateIcons();
+    }
+
+    if (themeToggleBtn) {
+      themeToggleBtn.addEventListener("click", toggleTheme);
+    }
+    if (themeToggleMobile) {
+      themeToggleMobile.addEventListener("click", () => {
+        toggleTheme();
+        mobileDropdown.classList.add("hidden"); // Close menu after action
+      });
+    }
+
+    // Button event handlers for both desktop and mobile
+    const downloadBtn = container.querySelector("#chatbot-download");
+    const downloadBtnMobile = container.querySelector("#chatbot-download-mobile");
+    const resetBtn = container.querySelector("#chatbot-reset");
+    const resetBtnMobile = container.querySelector("#chatbot-reset-mobile");
+
+    function downloadChatHistory() {
+      const history = getFullChatHistory();
+      const markdown = history
+        .map(({ from, text, timestamp }) => {
+          const role = from === "user" ? "🧑 User" : "🤖 Assistant";
+          const time = new Date(timestamp).toLocaleString();
+          return `## ${role} (${time})\n\n${text}\n`;
+        })
+        .join("\n---\n\n");
+      const blob = new Blob([markdown], { type: "text/markdown" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = cfg.downloadFilename || "chat-history.md";
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    function resetChat() {
+      if (!cfg.resetWarning || confirm(cfg.resetWarning)) {
+        localStorage.removeItem("chatbot-history");
+        body.innerHTML = "";
+        if (cfg.welcomeMessage) {
+          appendMessage(cfg.welcomeMessage, "bot");
+          saveMessage(cfg.welcomeMessage, "bot");
+        }
+      }
+    }
+
+    if (downloadBtn) downloadBtn.onclick = downloadChatHistory;
+    if (downloadBtnMobile) {
+      downloadBtnMobile.onclick = () => {
+        downloadChatHistory();
+        mobileDropdown.classList.add("hidden");
+      };
+    }
+    if (resetBtn) resetBtn.onclick = resetChat;
+    if (resetBtnMobile) {
+      resetBtnMobile.onclick = () => {
+        resetChat();
+        mobileDropdown.classList.add("hidden");
+      };
+    }
 
     // --- hide icon when chat is open & vice versa ---
     toggleBtn.onclick = (e) => {
@@ -338,8 +503,6 @@
     const body = container.querySelector("#chatbot-body");
     const input = container.querySelector("#chatbot-input");
     const sendBtn = container.querySelector("#chatbot-send");
-    const resetBtn = container.querySelector("#chatbot-reset");
-    const downloadBtn = container.querySelector("#chatbot-download");
 
     function appendMessage(text, from, timestamp = null, docs = []) {
       const div = document.createElement("div");
@@ -648,18 +811,7 @@
       }
     });
 
-    resetBtn.onclick = () => {
-      if (!cfg.resetWarning || confirm(cfg.resetWarning)) {
-        localStorage.removeItem("chatbot-history");
-        body.innerHTML = "";
-        if (cfg.welcomeMessage) {
-          appendMessage(cfg.welcomeMessage, "bot");
-          saveMessage(cfg.welcomeMessage, "bot");
-        }
-      }
-    };
-
-    downloadBtn.onclick = downloadChatHistory;
+    // Event handlers are now defined above with the responsive menu system
 
     // container.classList.add("flex");
     // container.classList.add("flex-col");
